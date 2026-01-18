@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+
+.light {
+    --grape: 114, 35, 204;
+    --background: 245, 245, 245;
+    --border: 212, 212, 212;
+    --card: 255, 255, 255;
+    --copy-primary: 23, 23, 23;
+    --copy-secondary: 115, 115, 115;
+    --cta: 139, 92, 246;
+    --cta-active: 124, 58, 237;
+    --cta-text: 255, 255, 255;
+    background: rgba(var(--background));
+
+    /* Border thickness variables */
+    --border-thickness-thin: 1px;
+    --border-thickness-default: 2px;
+    --border-thickness-thick: 4px;
+    --border-thickness-extra: 6px;
+}
+
+.dark {
+    --grape: 160, 100, 230;
+    --background: 23, 23, 23;
+    --border: 64, 64, 64;
+    --card: 38, 38, 38;
+    --copy-primary: 245, 245, 245;
+    --copy-secondary: 163, 163, 163;
+    --cta: 124, 58, 237;
+    --cta-active: 139, 92, 246;
+    --cta-text: 255, 255, 255;
+    background: rgba(var(--background));
+
+    /* Border thickness variables */
+    --border-thickness-thin: 1px;
+    --border-thickness-default: 2px;
+    --border-thickness-thick: 4px;
+    --border-thickness-extra: 6px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Border utility classes */
+.border-thin {
+    border-width: var(--border-thickness-thin);
+}
+
+.border-default {
+    border-width: var(--border-thickness-default);
+}
+
+.border-thick {
+    border-width: var(--border-thickness-thick);
+}
+
+.border-extra {
+    border-width: var(--border-thickness-extra);
+}
+
+/* Combined border-color and thickness classes */
+.border-primary-thin {
+    border-width: var(--border-thickness-thin);
+    border-color: rgba(var(--border), 1);
+}
+
+.border-primary-default {
+    border-width: var(--border-thickness-default);
+    border-color: rgba(var(--border), 1);
+}
+
+.border-primary-thick {
+    border-width: var(--border-thickness-thick);
+    border-color: rgba(var(--border), 1);
+}
+
+.border-cta-thin {
+    border-width: var(--border-thickness-thin);
+    border-color: rgba(var(--cta), 1);
+}
+
+.border-cta-default {
+    border-width: var(--border-thickness-default);
+    border-color: rgba(var(--cta), 1);
+}
+
+.border-cta-thick {
+    border-width: var(--border-thickness-thick);
+    border-color: rgba(var(--cta), 1);
+}
+
+/* Dashed borders */
+.border-dashed-thin {
+    border-width: var(--border-thickness-thin);
+    border-style: dashed;
+    border-color: rgba(var(--border), 1);
+}
+
+.border-dashed-default {
+    border-width: var(--border-thickness-default);
+    border-style: dashed;
+    border-color: rgba(var(--border), 1);
+}
