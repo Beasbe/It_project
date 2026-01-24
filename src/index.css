@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+    /* Border thickness variables */
+    --border-thickness-thin: 1px;
+    --border-thickness-default: 2px;
+    --border-thickness-thick: 4px;
+    --border-thickness-extra: 6px;
+}
 
 .light {
     --grape: 114, 35, 204;
@@ -12,12 +19,6 @@
     --cta-active: 124, 58, 237;
     --cta-text: 255, 255, 255;
     background: rgba(var(--background));
-
-    /* Border thickness variables */
-    --border-thickness-thin: 1px;
-    --border-thickness-default: 2px;
-    --border-thickness-thick: 4px;
-    --border-thickness-extra: 6px;
 }
 
 .dark {
@@ -31,12 +32,6 @@
     --cta-active: 139, 92, 246;
     --cta-text: 255, 255, 255;
     background: rgba(var(--background));
-
-    /* Border thickness variables */
-    --border-thickness-thin: 1px;
-    --border-thickness-default: 2px;
-    --border-thickness-thick: 4px;
-    --border-thickness-extra: 6px;
 }
 
 @keyframes fadeIn {
@@ -50,8 +45,120 @@
     }
 }
 
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes circle-expand {
+    from {
+        clip-path: circle(0% at 95% 40px);
+        opacity: 0.5;
+    }
+    to {
+        clip-path: circle(150% at 95% 40px);
+        opacity: 1;
+    }
+}
+
+@keyframes circle-shrink {
+    from {
+        clip-path: circle(150% at 95% 40px);
+        opacity: 1;
+    }
+    to {
+        clip-path: circle(0% at 95% 40px);
+        opacity: 0.5;
+    }
+}
+
+@keyframes theme-switch-fade {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
 .animate-fadeIn {
     animation: fadeIn 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 0.5s ease;
+}
+
+.animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+}
+
+.animate-theme-switch {
+    animation: theme-switch-fade 0.3s ease-out;
 }
 
 /* Border utility classes */
@@ -113,4 +220,21 @@
     border-width: var(--border-thickness-default);
     border-style: dashed;
     border-color: rgba(var(--border), 1);
+}
+
+@layer utilities {
+    /* Плавные переходы для интерфейса */
+    .transition-theme {
+        transition-property: background-color, border-color, color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+
+    .transition-slow {
+        transition-duration: 500ms;
+    }
+
+    .transition-fast {
+        transition-duration: 150ms;
+    }
 }

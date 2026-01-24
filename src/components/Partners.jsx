@@ -1,128 +1,196 @@
 // components/Partners.jsx
-import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const Partners = () => {
     const companies = [
-        "TechCorp", "InnovateCo", "FutureSystems", "DigitalSolutions",
-        "WebMasters", "CloudNet", "DataFlow", "SecureSoft",
-        "AppCraft", "CodeLab", "PixelPerfect", "NetVantage",
-        "ByteWorks", "MetaLogic", "SwiftStack", "CyberCore"
+        "TechCorp Solutions",
+        "InnovateCo Group",
+        "Future Systems Inc",
+        "Digital Solutions Pro",
+        "Web Masters Team",
+        "Cloud Network Tech",
+        "Data Flow Systems",
+        "Secure Soft Corp",
+        "App Craft Studio",
+        "Code Lab Experts",
+        "Pixel Perfect Design",
+        "Net Vantage LLC",
+        "Byte Works Int.",
+        "Meta Logic Systems",
+        "Swift Stack Dev",
+        "Cyber Core Security"
     ];
 
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-    const autoPlayRef = useRef(null);
-    const itemsPerView = 4;
-    const visibleItems = 8;
+    const [visibleCount, setVisibleCount] = useState(8);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-    const extendedCompanies = [...companies, ...companies, ...companies];
-
+    // Определяем сколько показывать в зависимости от ширины экрана
     useEffect(() => {
-        if (!isAutoPlaying) return;
-
-        autoPlayRef.current = setInterval(() => {
-            setCurrentIndex(prev => (prev + 1) % companies.length);
-        }, 3000);
-
-        return () => {
-            if (autoPlayRef.current) {
-                clearInterval(autoPlayRef.current);
+        const updateVisibleCount = () => {
+            if (window.innerWidth < 640) {
+                setVisibleCount(4);
+            } else if (window.innerWidth < 1024) {
+                setVisibleCount(6);
+            } else {
+                setVisibleCount(8);
             }
         };
-    }, [isAutoPlaying, companies.length]);
 
-    const handleNext = () => {
-        stopAutoPlay();
-        setCurrentIndex(prev => (prev + 2) % companies.length);
+        updateVisibleCount();
+        window.addEventListener('resize', updateVisibleCount);
+
+        return () => {
+            window.removeEventListener('resize', updateVisibleCount);
+        };
+    }, []);
+
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
     };
 
-    const handlePrev = () => {
-        stopAutoPlay();
-        setCurrentIndex(prev => (prev - 2 + companies.length) % companies.length);
-    };
-
-    const stopAutoPlay = () => {
-        setIsAutoPlaying(false);
-        if (autoPlayRef.current) {
-            clearInterval(autoPlayRef.current);
-        }
-    };
-
-    const toggleAutoPlay = () => {
-        setIsAutoPlaying(!isAutoPlaying);
-    };
-
-    const itemWidth = 100 / itemsPerView;
-    const offset = -currentIndex * itemWidth;
+    const companiesToShow = isExpanded ? companies : companies.slice(0, visibleCount);
 
     return (
-        <section className="py-16 bg-card border-t border-primary-default w-full">
-            <div className="px-4">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold mb-12">Наши партнеры</h2>
+        <section className="py-12 md:py-20 bg-card border-t border-primary-default w-full">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-12 md:mb-16">
+                    <h2 className="text-2xl md:text-4xl font-bold mb-4 text-copy-primary">
+                        Наши партнеры
+                    </h2>
+                    <p className="text-copy-secondary text-sm md:text-base max-w-2xl mx-auto">
+                        Сотрудничаем с ведущими компаниями отрасли
+                    </p>
                 </div>
 
-                <div className="relative w-full">
-
-                    <div className="overflow-hidden w-full">
+                {/* Сетка партнеров */}
+                <div className="
+                    grid grid-cols-1 sm:grid-cols-2
+                    lg:grid-cols-3 xl:grid-cols-4
+                    gap-4 md:gap-6
+                    mx-auto max-w-6xl
+                ">
+                    {companiesToShow.map((company, index) => (
                         <div
-                            className="flex transition-transform duration-500 ease-out"
-                            style={{ transform: `translateX(${offset}%)` }}
+                            key={index}
+                            className="
+                                group relative
+                                h-full min-h-[120px] md:min-h-[140px]
+                                transition-all duration-300
+                            "
                         >
-                            {extendedCompanies.map((company, index) => (
-                                <div
-                                    key={index}
-                                    className="flex-shrink-0 px-2 md:px-4"
-                                    style={{ width: `${itemWidth}%` }}
-                                >
-                                    <div className="bg-background border border-primary-default rounded-xl p-4 md:p-8 h-28 md:h-32 flex items-center justify-center transition-all duration-300 hover:border-cta hover:shadow-lg group mx-1">
-                                        <span className="text-lg md:text-xl font-semibold text-copy-primary group-hover:text-cta transition-colors text-center">
-                                            {company}
-                                        </span>
-                                    </div>
+                            <div className="
+                                absolute inset-0
+                                bg-background
+                                dark:bg-card
+                                rounded-xl md:rounded-2xl
+                                border-default border-border
+                                group-hover:border-cta
+                                group-hover:border-default
+                                group-hover:shadow-xl
+                                group-hover:-translate-y-1
+                                transition-all duration-500
+                                p-4 md:p-6
+                                flex items-center justify-center
+                                text-center
+                                h-full
+                            ">
+                                {/* Название компании */}
+                                <div className="w-full">
+                                    <h3 className="
+                                        font-medium md:font-semibold
+                                        text-copy-primary
+                                        text-sm md:text-base
+                                        line-clamp-3
+                                        leading-snug
+                                        px-1
+                                        group-hover:text-cta
+                                        transition-colors duration-300
+                                    ">
+                                        {company}
+                                    </h3>
+                                    <div className="
+                                        mt-3
+                                        h-0.5 w-12 mx-auto
+                                        bg-gradient-to-r from-transparent via-cta/50 to-transparent
+                                        opacity-0 group-hover:opacity-100
+                                        transition-all duration-500
+                                    " />
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </div>
+                    ))}
+                </div>
 
-                    {/* Кнопки навигации */}
-                    <div className="flex justify-center gap-4 mt-8">
+                {/* Кнопка "Показать еще/Скрыть" если компаний больше чем visibleCount */}
+                {companies.length > visibleCount && (
+                    <div className="text-center mt-10 md:mt-14">
                         <button
-                            onClick={handlePrev}
-                            className="p-3 rounded-full border border-primary-default hover:border-cta hover:bg-cta/10 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={!isAutoPlaying && currentIndex === 0}
+                            onClick={toggleExpand}
+                            className="
+                                inline-flex items-center justify-center
+                                px-6 md:px-8 py-3 md:py-4
+                                rounded-full
+                                bg-cta
+                                text-cta-text font-medium
+                                hover:bg-cta-active
+                                active:scale-95
+                                transition-all duration-300
+                                shadow-lg hover:shadow-xl
+                                text-sm md:text-base
+                                min-w-[160px]
+                            "
                         >
-                            <ChevronLeft
-                                size={24}
-                                className="text-copy-primary group-hover:text-cta transition-colors"
-                            />
-                        </button>
-
-                        <div className="flex items-center gap-2">
-                            {companies.slice(0, 6).map((_, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                        idx === currentIndex % companies.length
-                                            ? 'bg-cta w-6'
-                                            : 'bg-border'
-                                    }`}
+                            <span>
+                                {isExpanded ? 'Скрыть' : 'Показать все'}
+                            </span>
+                            <svg
+                                className={`
+                                    ml-2 w-5 h-5
+                                    transition-transform duration-300
+                                    ${isExpanded ? 'rotate-180' : ''}
+                                `}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M19 9l-7 7-7-7"
                                 />
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={handleNext}
-                            className="p-3 rounded-full border border-primary-default hover:border-cta hover:bg-cta/10 transition-all duration-300 group"
-                        >
-                            <ChevronRight
-                                size={24}
-                                className="text-copy-primary group-hover:text-cta transition-colors"
-                            />
+                            </svg>
                         </button>
-                    </div>
 
+                        <p className="
+                            mt-4 text-sm text-copy-secondary
+                            opacity-0 animate-fadeIn
+                        ">
+                            {isExpanded
+                                ? `${companies.length} компаний`
+                                : `${visibleCount} из ${companies.length} компаний`
+                            }
+                        </p>
+                    </div>
+                )}
+
+                {/* Индикаторы для мобилки */}
+                <div className="
+                    flex justify-center gap-2 mt-8
+                    md:hidden
+                ">
+                    {Array.from({
+                        length: Math.ceil(companies.length / visibleCount)
+                    }).map((_, idx) => (
+                        <div
+                            key={idx}
+                            className={`
+                                w-2 h-2 rounded-full
+                                transition-all duration-300
+                                ${idx === 0 ? 'bg-cta w-4' : 'bg-border'}
+                            `}
+                        />
+                    ))}
                 </div>
             </div>
         </section>

@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { ThemeProvider } from 'next-themes'
+import { BrowserRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
+    <BrowserRouter basename="/It_project/">
     <React.StrictMode>
         <ThemeProvider
             attribute="class"
@@ -18,4 +20,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <App />
         </ThemeProvider>
     </React.StrictMode>
+    </BrowserRouter>
 )

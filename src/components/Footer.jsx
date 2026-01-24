@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
     const navigationLinks = [
         { name: 'Каталог решений', href: '#' },
-        { name: 'IT решения', href: '#' },
         { name: 'О компании', href: '#' },
         { name: 'Новости', href: '#' },
         { name: 'Контакты', href: '#' }
@@ -152,26 +151,6 @@ const Footer = () => {
                             © {new Date().getFullYear()} IT Solutions. Все права защищены.
                         </div>
 
-                        <div className="flex flex-wrap justify-center gap-6">
-                            <a
-                                href="#"
-                                className="text-sm text-copy-secondary hover:text-cta transition-colors duration-200"
-                            >
-                                Политика конфиденциальности
-                            </a>
-                            <a
-                                href="#"
-                                className="text-sm text-copy-secondary hover:text-cta transition-colors duration-200"
-                            >
-                                Пользовательское соглашение
-                            </a>
-                            <a
-                                href="#"
-                                className="text-sm text-copy-secondary hover:text-cta transition-colors duration-200"
-                            >
-                                Карта сайта
-                            </a>
-                        </div>
                     </div>
 
                     {/* Информация о разработчике */}

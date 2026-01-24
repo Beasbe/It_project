@@ -20,6 +20,15 @@ const Hero = () => {
         }
     }, [isHovered]);
 
+    // Функция для прокрутки на один экран
+    const scrollOneScreen = () => {
+        const screenHeight = window.innerHeight;
+        window.scrollBy({
+            top: screenHeight,
+            behavior: 'smooth'
+        });
+    };
+
     return (
         <section className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 bg-background overflow-hidden">
             <div
@@ -133,13 +142,16 @@ const Hero = () => {
             transition-all duration-700 delay-500
             ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
           `}>
-                        <button className={`
+                        <button
+                            className={`
               relative px-6 py-3 rounded-full bg-cta text-cta-text font-semibold
               overflow-hidden group
               transition-all duration-500
               hover:bg-cta-active hover:scale-105 hover:shadow-xl
               ${isHovered ? 'animate-bounce' : ''}
-            `}>
+            `}
+                            onClick={scrollOneScreen} // Добавляем обработчик клика
+                        >
                             <span className="relative z-10">Исследовать</span>
                             <span className={`
                 absolute inset-0 bg-white/20 rounded-full
