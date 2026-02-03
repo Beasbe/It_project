@@ -48,8 +48,9 @@ const Header = () => {
     };
 
     const navItems = [
-        { name: 'Каталог решений', href: '#' },
+        { name: 'Каталог решений', href: 'projects' },
         { name: 'О компании', href: 'about' },
+        { name: 'Новости', href: 'news' },
         { name: 'Контакты', href: '#' }
     ];
 

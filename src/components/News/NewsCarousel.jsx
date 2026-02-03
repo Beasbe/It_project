@@ -10,7 +10,6 @@ const NewsCarousel = () => {
         .sort((a, b) => {
             // Сортируем по году и дате
             if (a.year !== b.year) return b.year - a.year;
-            // Для одинакового года сортируем по дате (нужно парсить дату)
             const parseDate = (dateStr) => {
                 const months = {
                     'января': 0, 'февраля': 1, 'марта': 2, 'апреля': 3, 'мая': 4, 'июня': 5,

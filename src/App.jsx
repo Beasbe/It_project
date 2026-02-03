@@ -7,6 +7,8 @@ import Home from './pages/Home'
 import About from './pages/About'
 import NewsPage from './pages/NewsPage'
 import NewsDetail from './pages/NewsDetail'
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetail from './pages/ProjectDetail';
 
 function App() {
     return (
@@ -19,6 +21,8 @@ function App() {
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/category/:category" element={<NewsPage />} />
                     <Route path="/news/:id" element={<NewsDetail />} />
+                    <Route path="/projects" element={<ProjectsPage />} />
+                    <Route path="/projects/:slug" element={<ProjectDetail />} />
                 </Routes>
                 <Footer />
             </div>

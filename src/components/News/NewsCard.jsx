@@ -26,7 +26,7 @@ const NewsCard = ({ news }) => {
                 {/* Категория и дата в одну строку */}
                 <div className="flex items-center justify-between mb-3">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-border/30 text-copy-secondary">
-                        [{news.category}]
+                        {news.category}
                     </span>
                     <span className="text-sm text-copy-secondary">
                         {news.date}
