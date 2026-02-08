@@ -70,7 +70,7 @@ const Hero = () => {
                     ${isHovered ? 'drop-shadow-[0_0_30px_rgba(var(--cta),0.5)]' : ''}
                     text-shadow-lg shadow-white/50 dark:shadow-black/50 /* ← Добавь эту строку */
                 `}>
-                    СТРОЙКА
+                    ПЯТИЛЕТКА
                 </span>
                             <span className={`
                 block text-3xl md:text-5xl font-light mt-2

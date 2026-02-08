@@ -7,6 +7,7 @@ export interface NewsItem {
     excerpt: string
     content: string
     image: string
+    featured?: boolean;
 }
 
 
