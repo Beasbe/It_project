@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[39756,["/It_project/_next/static/chunks/ff1a16fafef87110.js","/It_project/_next/static/chunks/d2be314c3ece3fbe.js"],"default"]
+3:I[37457,["/It_project/_next/static/chunks/ff1a16fafef87110.js","/It_project/_next/static/chunks/d2be314c3ece3fbe.js"],"default"]
+4:I[22016,["/It_project/_next/static/chunks/2f61d253df88c59e.js"],""]
+0:{"buildId":"MuamOT8GwePvlxG_4u1so","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}],"notFound":[["$","div",null,{"className":"min-h-screen py-12 px-4 text-center","children":["$","div",null,{"className":"max-w-2xl mx-auto","children":[["$","h1",null,{"className":"text-4xl font-bold text-copy-primary mb-6","children":"Новость не найдена"}],["$","p",null,{"className":"text-lg text-copy-secondary mb-8","children":"Запрашиваемая новость не существует или была удалена."}],["$","$L4",null,{"href":"/news","className":"inline-block px-6 py-3 bg-cta text-cta-text font-medium rounded-lg hover:bg-cta-active transition-colors","children":"Вернуться к новостям"}]]}]}],[]]}]]}],"loading":null,"isPartial":false}
