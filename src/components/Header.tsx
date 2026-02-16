@@ -49,10 +49,10 @@ const Header = () => {
     };
 
     const navItems = [
-        { name: 'Каталог решений', href: 'projects' },
-        { name: 'О компании', href: 'about' },
-        { name: 'Новости', href: 'news' },
-        { name: 'Контакты', href: '#' }
+        { name: 'Каталог решений', href: '/projects' },
+        { name: 'О компании', href: '/about' },
+        { name: 'Новости', href: '/news' },
+        { name: 'Контакты', href: '/#contact' }
     ];
 
     if (!mounted) {
@@ -79,16 +79,17 @@ const Header = () => {
                     </Link>
 
                     {/* Навигация с отступами */}
-                    <nav className="flex items-center gap-8 space-x-12">
+                    <nav role="navigation" className="flex items-center gap-8 space-x-12">
                         {navItems.map((item) => (
-                            <a
+                            <Link
                                 key={item.name}
                                 href={item.href}
+                                prefetch={false}
                                 className="text-copy-secondary select-none hover:text-cta transition-all duration-300 font-medium relative group"
                             >
                                 {item.name}
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cta transition-all duration-300 group-hover:w-full"></span>
-                            </a>
+                            </Link>
                         ))}
                     </nav>
 
@@ -128,14 +129,14 @@ const Header = () => {
                 {/* Для мобилки - отдельная структура */}
                 <div className="flex items-center justify-between md:hidden">
                     {/* Логотип */}
-                    <div className="flex items-center space-x-2">
+                    <Link href="/" className="flex items-center space-x-2 no-underline">
                         <div className="h-10 w-10 bg-cta rounded flex items-center justify-center transition-transform duration-300 hover:scale-105">
                             <span className="text-cta-text font-bold text-lg">IT</span>
                         </div>
                         <span className="text-xl font-bold text-copy-primary">
                             АйТи ПРОЕКТ
                         </span>
-                    </div>
+                    </Link>
 
                     {/* Переключатель темы и кнопка меню */}
                     <div className="flex items-center space-x-6">
@@ -175,16 +176,18 @@ const Header = () => {
                 {/* Мобильное меню с анимацией */}
                 {isMenuOpen && (
                     <div className="md:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 animate-slideDown">
-                        <nav className="flex flex-col space-y-4">
+                        <nav role="navigation" className="flex flex-col space-y-4">
                             {navItems.map((item) => (
-                                <a
+                                <Link
                                     key={item.name}
-                                    href={`/${item.href}`}
+                                    href={item.href}
+                                    prefetch={false}
                                     className="py-3 px-4 text-copy-secondary hover:text-cta hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 rounded-lg"
                                     onClick={() => setIsMenuOpen(false)}
+                                    role="menuitem"
                                 >
                                     {item.name}
-                                </a>
+                                </Link>
                             ))}
                         </nav>
                     </div>

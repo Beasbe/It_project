@@ -1,54 +1,71 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useCallback, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import NewsCarousel from '../../src/components/NewsCarousel';
-import NewsCard from '../../src/components/NewsCard';
-import NewsArchiveRow from '../../src/components/NewsArchiveRow';
-import { newsData } from '@/data/newsData';
+import NewsCarousel from '@/components/NewsCarousel';
+import { useNewsData } from '@/hooks/useNewsData';
+import { NewsFilters } from '@/components/news/NewsFilters';
+import { NewsGrid } from '@/components/news/NewsGrid';
+import { NewsList } from '@/components/news/NewsList';
+import { NewsPagination } from '@/components/news/NewsPagination';
+import { NewsEmptyState } from '@/components/news/NewsEmptyState';
+import { NewsStats } from '@/components/news/NewsStats';
+import { QuickCategories } from '@/components/news/QuickCategories';
+import { DataSourceBadge } from '@/components/news/DataSourceBadge';
+import { newsData as localNewsData } from '@/data/newsData';
 
 function NewsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     
-    // Получаем категорию из URL только один раз при загрузке
-    const initialCategory = searchParams.get('category') || 'Все';
+    // Получаем параметры из URL
+    const initialCategory = searchParams.get('category') || '';
+    const initialYear = searchParams.get('year') || '';
+    const initialSearch = searchParams.get('search') || '';
+    const initialPage = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
+    const initialPerPage = searchParams.get('per_page') ? parseInt(searchParams.get('per_page')!) : 12;
     
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-    const [selectedYear, setSelectedYear] = useState('Все');
+    // Состояние для UI
+    const [searchQuery, setSearchQuery] = useState(initialSearch);
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory || 'Все');
+    const [selectedYear, setSelectedYear] = useState(initialYear || 'Все');
     const [viewMode, setViewMode] = useState('grid');
-    const [itemsPerPage, setItemsPerPage] = useState(12);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(initialPerPage);
+    
+    // Используем хук с параметрами из URL
+    const { 
+        news,
+        categories,
+        years,
+        latestNews,
+        isLoading,
+        error,
+        isBackendAvailable,
+        paginationMeta,
+        refreshData
+    } = useNewsData({
+        category: initialCategory || undefined,
+        year: initialYear || undefined,
+        search: initialSearch || undefined,
+        page: initialPage,
+        per_page: itemsPerPage
+    });
+    
 
-    // Получаем уникальные категории
-    const categories = useMemo(() => {
-        const categorySet = new Set<string>();
-        newsData.forEach(news => categorySet.add(news.category));
-        return ['Все', ...Array.from(categorySet)];
-    }, []);
-
-    // Получаем уникальные годы
-    const years = useMemo(() => {
-        const yearSet = new Set<number>();
-        newsData.forEach(news => yearSet.add(news.year));
-        const sortedYears = Array.from(yearSet).sort((a, b) => b - a);
-        return ['Все', ...sortedYears];
-    }, []);
-
-    // Фильтрация новостей
-    const filteredNews = useMemo(() => {
-        let filtered = newsData;
-
+    // Локальная фильтрация для fallback режима
+    const filteredLocalNews = useMemo(() => {
+        if (isBackendAvailable) return [];
+        
+        let filtered = localNewsData;
+        
         if (selectedCategory !== 'Все') {
             filtered = filtered.filter(news => news.category === selectedCategory);
         }
-
+        
         if (selectedYear !== 'Все') {
             filtered = filtered.filter(news => news.year === parseInt(selectedYear));
         }
-
+        
         if (searchQuery.trim() !== '') {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(news =>
@@ -57,101 +74,180 @@ function NewsPageContent() {
                 news.content.toLowerCase().includes(query)
             );
         }
-
+        
         return filtered;
-    }, [searchQuery, selectedCategory, selectedYear]);
+    }, [selectedCategory, selectedYear, searchQuery, isBackendAvailable]);
 
+    // Определяем какие данные показывать
+    const displayNews = isBackendAvailable ? news : filteredLocalNews;
+    const displayCategories = isBackendAvailable ? categories : Array.from(new Set(localNewsData.map(n => n.category)));
+    const displayYears = isBackendAvailable ? years : Array.from(new Set(localNewsData.map(n => n.year))).sort((a, b) => b - a);
+    const displayLatestNews = isBackendAvailable ? latestNews : localNewsData.filter(n => n.featured).slice(0, 5);
+    
     // Пагинация
-    const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const totalPages = isBackendAvailable 
+        ? paginationMeta?.last_page || 1
+        : Math.ceil(filteredLocalNews.length / itemsPerPage);
+    
+    const startIndex = (initialPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentNews = filteredNews.slice(startIndex, endIndex);
+    const currentNews = isBackendAvailable 
+        ? displayNews 
+        : displayNews.slice(startIndex, endIndex);
+    
+    const totalItems = isBackendAvailable 
+        ? paginationMeta?.total || displayNews.length 
+        : displayNews.length;
 
-    // Обработчик смены страницы
+    // Обработчики
+    const handleCategoryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newCategory = e.target.value;
+        setSelectedCategory(newCategory);
+        
+        const params = new URLSearchParams(searchParams.toString());
+        if (newCategory !== 'Все') {
+            params.set('category', newCategory);
+        } else {
+            params.delete('category');
+        }
+        params.delete('page');
+        
+        router.push(`/news?${params.toString()}`, { scroll: false });
+    }, [router, searchParams]);
+
+    const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newYear = e.target.value;
+        setSelectedYear(newYear);
+        
+        const params = new URLSearchParams(searchParams.toString());
+        if (newYear !== 'Все') {
+            params.set('year', newYear);
+        } else {
+            params.delete('year');
+        }
+        params.delete('page');
+        
+        router.push(`/news?${params.toString()}`, { scroll: false });
+    }, [router, searchParams]);
+
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        
+        const timeoutId = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (value.trim()) {
+                params.set('search', value);
+            } else {
+                params.delete('search');
+            }
+            params.delete('page');
+            router.push(`/news?${params.toString()}`, { scroll: false });
+        }, 500);
+        
+        return () => clearTimeout(timeoutId);
+    }, [router, searchParams]);
+
     const handlePageChange = useCallback((page: number) => {
-        setCurrentPage(page);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('page', page.toString());
+        router.push(`/news?${params.toString()}`, { scroll: false });
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
+    }, [router, searchParams]);
 
-    // Обработчик сброса фильтров
     const handleResetFilters = useCallback(() => {
         setSearchQuery('');
         setSelectedCategory('Все');
         setSelectedYear('Все');
-        setCurrentPage(1);
         router.push('/news');
     }, [router]);
 
-    // Обработчик изменения категории с обновлением URL
-    const handleCategoryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newCategory = e.target.value;
-        setSelectedCategory(newCategory);
-        setCurrentPage(1);
+    const handleItemsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = Number(e.target.value);
+        setItemsPerPage(value);
         
-        // Обновляем URL без использования useEffect
-        if (newCategory !== 'Все') {
-            router.push(`/news?category=${encodeURIComponent(newCategory)}`, { scroll: false });
-        } else {
-            router.push('/news', { scroll: false });
-        }
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('per_page', value.toString());
+        params.delete('page');
+        router.push(`/news?${params.toString()}`, { scroll: false });
+    }, [router, searchParams]);
+
+    const handleViewModeChange = useCallback((mode: string) => {
+        setViewMode(mode);
+    }, []);
+
+    const handleQuickCategorySelect = useCallback((category: string) => {
+        setSelectedCategory(category);
+        const params = new URLSearchParams();
+        params.set('category', category);
+        router.push(`/news?${params.toString()}`, { scroll: false });
     }, [router]);
 
-    // Обработчик поиска с debounce (опционально)
-    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1);
-    }, []);
-
-    // Обработчик изменения года
-    const handleYearChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedYear(e.target.value);
-        setCurrentPage(1);
-    }, []);
-
-    // Обработчик изменения количества элементов
-    const handleItemsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-    }, []);
-
-    // Генерация кнопок пагинации
-    const paginationButtons = useMemo(() => {
-        if (totalPages <= 1) return [];
+    // Годы для статистики
+const yearsRange = useMemo(() => {
+    const yearsList = displayYears;
+    if (!yearsList || yearsList.length === 0) return 'Н/Д';
+    
+    try {
+        const validYears = yearsList.filter(y => typeof y === 'number' && !isNaN(y));
+        if (validYears.length === 0) return 'Н/Д';
         
-        const buttons = [];
-        const maxVisible = 5;
+        const maxYear = Math.max(...validYears);
+        const minYear = Math.min(...validYears);
         
-        if (totalPages <= maxVisible) {
-            for (let i = 1; i <= totalPages; i++) {
-                buttons.push(i);
-            }
-        } else {
-            if (currentPage <= 3) {
-                for (let i = 1; i <= 4; i++) buttons.push(i);
-                buttons.push('...');
-                buttons.push(totalPages);
-            } else if (currentPage >= totalPages - 2) {
-                buttons.push(1);
-                buttons.push('...');
-                for (let i = totalPages - 3; i <= totalPages; i++) buttons.push(i);
-            } else {
-                buttons.push(1);
-                buttons.push('...');
-                buttons.push(currentPage - 1);
-                buttons.push(currentPage);
-                buttons.push(currentPage + 1);
-                buttons.push('...');
-                buttons.push(totalPages);
-            }
-        }
+        if (maxYear === -Infinity || minYear === Infinity) return 'Н/Д';
         
-        return buttons;
-    }, [currentPage, totalPages]);
+        return `${maxYear} - ${minYear}`;
+    } catch {
+        return 'Н/Д';
+    }
+}, [displayYears]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center py-16">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cta mx-auto"></div>
+                        <p className="mt-4 text-copy-secondary">Загрузка новостей...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error && !isBackendAvailable && displayNews.length === 0) {
+        return (
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center py-16">
+                        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+                            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-semibold text-copy-primary mb-2">
+                            Ошибка загрузки
+                        </h3>
+                        <p className="text-copy-secondary mb-6 max-w-md mx-auto">
+                            {error}
+                        </p>
+                        <button
+                            onClick={() => refreshData()}
+                            className="px-6 py-3 bg-cta text-cta-text font-medium rounded-lg hover:bg-cta-active transition-colors"
+                        >
+                            Повторить попытку
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
             <div className="max-w-7xl mx-auto">
-                {/* Заголовок */}
+                {/* Заголовок и статус */}
                 <div className="mb-8 md:mb-12 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-copy-primary mb-4">
                         Все новости
@@ -159,133 +255,45 @@ function NewsPageContent() {
                     <p className="text-lg text-copy-secondary max-w-3xl mx-auto">
                         Полный архив новостей компании. Будьте в курсе всех наших достижений и событий.
                     </p>
+                    <div className="mt-4 flex justify-center">
+                        <DataSourceBadge 
+                            isBackendAvailable={isBackendAvailable} 
+                            isLoading={isLoading} 
+                        />
+                    </div>
                 </div>
 
                 {/* Карусель с последними новостями */}
-                <div className="mb-12">
-                    <NewsCarousel />
-                </div>
-
-                {/* Панель поиска и фильтров */}
-                <div className="mb-8 bg-card border border-border rounded-lg p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        {/* Поиск */}
-                        <div>
-                            <label className="block text-sm font-medium text-copy-primary mb-2">
-                                Поиск по новостям
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={handleSearchChange}
-                                    placeholder="Введите ключевые слова..."
-                                    className="w-full px-4 py-3 pl-12 bg-background border border-border rounded-lg focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-colors"
-                                />
-                                <svg className="absolute left-4 top-3.5 w-5 h-5 text-copy-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                        </div>
-
-                        {/* Фильтр по категории */}
-                        <div>
-                            <label className="block text-sm font-medium text-copy-primary mb-2">
-                                Категория
-                            </label>
-                            <select
-                                value={selectedCategory}
-                                onChange={handleCategoryChange}
-                                className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-colors"
-                            >
-                                {categories.map(category => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Фильтр по году */}
-                        <div>
-                            <label className="block text-sm font-medium text-copy-primary mb-2">
-                                Год
-                            </label>
-                            <select
-                                value={selectedYear}
-                                onChange={handleYearChange}
-                                className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-colors"
-                            >
-                                {years.map(year => (
-                                    <option key={year} value={year}>
-                                        {year === 'Все' ? 'Все годы' : year}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                {displayLatestNews.length > 0 && (
+                    <div className="mb-12">
+                        <NewsCarousel news={displayLatestNews} />
                     </div>
+                )}
 
-                    {/* Управление отображением */}
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center space-x-4">
-                            <span className="text-sm text-copy-secondary">
-                                Режим просмотра:
-                            </span>
-                            <div className="flex border border-border rounded-lg overflow-hidden">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`px-4 py-2 transition-colors ${viewMode === 'grid' ? 'bg-cta text-cta-text' : 'bg-background hover:bg-card'}`}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`px-4 py-2 transition-colors ${viewMode === 'list' ? 'bg-cta text-cta-text' : 'bg-background hover:bg-card'}`}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                {/* Фильтры */}
+                <NewsFilters
+                    searchQuery={searchQuery}
+                    selectedCategory={selectedCategory}
+                    selectedYear={selectedYear}
+                    categories={displayCategories}
+                    years={displayYears}
+                    viewMode={viewMode}
+                    itemsPerPage={itemsPerPage}
+                    onSearchChange={handleSearchChange}
+                    onCategoryChange={handleCategoryChange}
+                    onYearChange={handleYearChange}
+                    onViewModeChange={handleViewModeChange}
+                    onItemsPerPageChange={handleItemsPerPageChange}
+                    onResetFilters={handleResetFilters}
+                    showResetButton={selectedCategory !== 'Все' || selectedYear !== 'Все' || !!searchQuery}
+                />
 
-                        <div className="flex items-center space-x-4">
-                            <span className="text-sm text-copy-secondary">
-                                Показывать по:
-                            </span>
-                            <select
-                                value={itemsPerPage}
-                                onChange={handleItemsPerPageChange}
-                                className="px-3 py-2 bg-background border border-border rounded-lg focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-colors"
-                            >
-                                <option value={6}>6</option>
-                                <option value={12}>12</option>
-                                <option value={24}>24</option>
-                                <option value={48}>48</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            {(searchQuery !== '' || selectedCategory !== 'Все' || selectedYear !== 'Все') && (
-                                <button
-                                    onClick={handleResetFilters}
-                                    className="px-4 py-2 text-sm border border-border rounded-lg hover:border-cta hover:text-cta transition-colors"
-                                >
-                                    Сбросить фильтры
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Результаты поиска */}
+                {/* Результаты */}
                 <div className="mb-8">
                     <div className="flex flex-wrap items-center justify-between mb-6">
                         <div>
                             <h2 className="text-2xl font-bold text-copy-primary">
-                                Найдено новостей: {filteredNews.length}
+                                Найдено новостей: {totalItems}
                             </h2>
                             {searchQuery && (
                                 <p className="text-copy-secondary mt-1">
@@ -293,194 +301,67 @@ function NewsPageContent() {
                                 </p>
                             )}
                         </div>
-                        {filteredNews.length > 0 && (
+                        {currentNews.length > 0 && (
                             <div className="text-sm text-copy-secondary">
-                                Страница {currentPage} из {totalPages}
+                                Страница {initialPage} из {totalPages}
                             </div>
                         )}
                     </div>
 
-                    {/* Отображение новостей */}
                     {currentNews.length > 0 ? (
                         <>
                             {viewMode === 'grid' ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {currentNews.map((news) => (
-                                        <NewsCard key={news.id} news={news} />
-                                    ))}
-                                </div>
+                                <NewsGrid news={currentNews} />
                             ) : (
-                                <div className="bg-card border border-border rounded-lg overflow-hidden">
-                                    <div className="p-4 border-b border-border bg-background/50">
-                                        <div className="grid grid-cols-12 text-sm font-medium text-copy-secondary">
-                                            <div className="col-span-3">Дата</div>
-                                            <div className="col-span-2">Категория</div>
-                                            <div className="col-span-6">Заголовок</div>
-                                            <div className="col-span-1"></div>
-                                        </div>
-                                    </div>
-
-                                    <div className="divide-y divide-border">
-                                        {currentNews.map((news) => (
-                                            <NewsArchiveRow key={news.id} news={news} />
-                                        ))}
-                                    </div>
-                                </div>
+                                <NewsList news={currentNews} />
                             )}
 
-                            {/* Пагинация */}
-                            {totalPages > 1 && (
-                                <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="text-sm text-copy-secondary">
-                                        Показано {startIndex + 1}-{Math.min(endIndex, filteredNews.length)} из {filteredNews.length} новостей
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage === 1}
-                                            className="px-4 py-2 border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-cta hover:text-cta transition-colors"
-                                        >
-                                            ← Назад
-                                        </button>
-
-                                        <div className="flex items-center space-x-2">
-                                            {paginationButtons.map((pageNum, index) => (
-                                                pageNum === '...' ? (
-                                                    <span key={`ellipsis-${index}`} className="text-copy-secondary px-2">
-                                                        ...
-                                                    </span>
-                                                ) : (
-                                                    <button
-                                                        key={pageNum}
-                                                        onClick={() => handlePageChange(pageNum as number)}
-                                                        className={`w-10 h-10 rounded-lg transition-colors ${
-                                                            currentPage === pageNum
-                                                                ? 'bg-cta text-cta-text'
-                                                                : 'border border-border hover:border-cta hover:text-cta'
-                                                        }`}
-                                                    >
-                                                        {pageNum}
-                                                    </button>
-                                                )
-                                            ))}
-                                        </div>
-
-                                        <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === totalPages}
-                                            className="px-4 py-2 border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-cta hover:text-cta transition-colors"
-                                        >
-                                            Вперед →
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                            <NewsPagination
+                                currentPage={initialPage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                startIndex={startIndex}
+                                endIndex={endIndex}
+                                onPageChange={handlePageChange}
+                            />
                         </>
                     ) : (
-                        <div className="text-center py-16">
-                            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-border/30 flex items-center justify-center">
-                                <svg className="w-12 h-12 text-copy-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-2xl font-semibold text-copy-primary mb-2">
-                                Новости не найдены
-                            </h3>
-                            <p className="text-copy-secondary mb-6 max-w-md mx-auto">
-                                Попробуйте изменить параметры поиска или выбрать другую категорию
-                            </p>
-                            <button
-                                onClick={handleResetFilters}
-                                className="px-6 py-3 bg-cta text-cta-text font-medium rounded-lg hover:bg-cta-active transition-colors"
-                            >
-                                Показать все новости
-                            </button>
-                        </div>
+                        <NewsEmptyState onReset={handleResetFilters} />
                     )}
                 </div>
 
                 {/* Статистика */}
-                <div className="mt-12 pt-8 border-t border-border">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="text-center p-4 bg-card border border-border rounded-lg">
-                            <div className="text-3xl font-bold text-cta mb-2">
-                                {newsData.length}
-                            </div>
-                            <div className="text-sm text-copy-secondary">
-                                Всего новостей
-                            </div>
-                        </div>
-                        <div className="text-center p-4 bg-card border border-border rounded-lg">
-                            <div className="text-3xl font-bold text-grape mb-2">
-                                {years.length - 1}
-                            </div>
-                            <div className="text-sm text-copy-secondary">
-                                Года
-                            </div>
-                        </div>
-                        <div className="text-center p-4 bg-card border border-border rounded-lg">
-                            <div className="text-3xl font-bold text-cta mb-2">
-                                {categories.length - 1}
-                            </div>
-                            <div className="text-sm text-copy-secondary">
-                                Категорий
-                            </div>
-                        </div>
-                        <div className="text-center p-4 bg-card border border-border rounded-lg">
-                            <div className="text-3xl font-bold text-grape mb-2">
-                                {Math.max(...years.slice(1) as number[])} - {Math.min(...years.slice(1) as number[])}
-                            </div>
-                            <div className="text-sm text-copy-secondary">
-                                Период
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <NewsStats
+                    totalNews={totalItems}
+                    totalCategories={displayCategories.length}
+                    totalYears={displayYears.length}
+                    yearsRange={yearsRange}
+                />
 
-                {/* Быстрые ссылки на категории */}
-                <div className="mt-8">
-                    <h3 className="text-lg font-semibold text-copy-primary mb-4">
-                        Популярные категории:
-                    </h3>
-                    <div className="flex flex-wrap gap-3">
-                        {categories.slice(1).map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => {
-                                    setSelectedCategory(cat);
-                                    setCurrentPage(1);
-                                    router.push(`/news?category=${encodeURIComponent(cat)}`, { scroll: false });
-                                }}
-                                className={`px-4 py-2 rounded-lg transition-colors ${
-                                    selectedCategory === cat
-                                        ? 'bg-cta text-cta-text'
-                                        : 'bg-card border border-border hover:border-cta hover:text-cta'
-                                }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                {/* Быстрые категории */}
+                <QuickCategories
+                    categories={displayCategories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleQuickCategorySelect}
+                />
             </div>
         </div>
     );
-};
+}
 
 export default function NewsPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cta mx-auto"></div>
-            <p className="mt-4 text-copy-secondary">Загрузка новостей...</p>
-          </div>
-        </div>
-      </div>
-    }>
-      <NewsPageContent />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center py-16">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cta mx-auto"></div>
+                        <p className="mt-4 text-copy-secondary">Загрузка новостей...</p>
+                    </div>
+                </div>
+            </div>
+        }>
+            <NewsPageContent />
+        </Suspense>
+    );
 }

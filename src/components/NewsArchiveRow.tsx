@@ -1,51 +1,43 @@
 import React from 'react';
 import Link from 'next/link';
-import type { NewsItem } from '@/data/newsData';
+import { NewsItem } from '@/types';
 
-type NewsArchiveRowProps = {
+interface NewsArchiveRowProps {
   news: NewsItem;
-};
+}
 
-const NewsArchiveRow = ({ news }: NewsArchiveRowProps) => {
+export default function NewsArchiveRow({ news }: NewsArchiveRowProps) {
   return (
-    <div className="flex items-center py-4 px-4 border-b border-border hover:bg-card/50 transition-colors group">
-      {/* Дата слева */}
-      <div className="w-28 flex-shrink-0">
-        <div className="text-sm text-copy-secondary">
-          {news.date}
-        </div>
-        {news.year && (
-          <div className="text-xs text-copy-secondary mt-1">
-            {news.year} год
-          </div>
-        )}
+    <div className="grid grid-cols-12 p-4 hover:bg-background/50 transition-colors">
+      <div className="col-span-3 text-copy-secondary">
+        {news.date}
       </div>
-
-      {/* Категория */}
-      <div className="w-32 flex-shrink-0 ml-4">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-border/30 text-copy-secondary">
-          [{news.category}]
+      <div className="col-span-2">
+        <span className="px-2 py-1 bg-cta/10 text-cta text-xs font-medium rounded-full">
+          {news.category}
         </span>
       </div>
-
-      {/* Заголовок */}
-      <div className="flex-1 ml-6 min-w-0">
-        <h3 className="text-base font-medium text-copy-primary group-hover:text-cta transition-colors line-clamp-2">
-          {news.title}
-        </h3>
-      </div>
-
-      {/* Кнопка справа */}
-      <div className="w-24 flex-shrink-0 ml-4 text-right">
-        <Link
-          href={`/news/${news.id}`}
-          className="inline-flex items-center justify-center px-4 py-2 text-sm border border-border rounded-lg hover:border-cta hover:text-cta transition-colors whitespace-nowrap"
+      <div className="col-span-6">
+        <Link 
+          href={`/news/${news.slug}`}
+          className="font-medium text-copy-primary hover:text-cta transition-colors line-clamp-1"
         >
-          Перейти
+          {news.title}
+        </Link>
+        {news.featured && (
+          <span className="ml-2 text-xs text-grape">★</span>
+        )}
+      </div>
+      <div className="col-span-1 text-right">
+        <Link
+          href={`/news/${news.slug}`}
+          className="inline-flex items-center text-cta hover:text-cta-active transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </Link>
       </div>
     </div>
   );
-};
-
-export default NewsArchiveRow;
+}

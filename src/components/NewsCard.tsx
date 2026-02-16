@@ -1,72 +1,59 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import type { NewsItem } from '@/data/newsData';
+import { NewsItem } from '@/types';
 
-
-type NewsCardProps = {
+interface NewsCardProps {
   news: NewsItem;
-};
+}
 
-const NewsCard = ({ news }: NewsCardProps) => {
+export default function NewsCard({ news }: NewsCardProps) {
   return (
-    <div className="group bg-card border border-border rounded-lg overflow-hidden transition-theme hover:shadow-lg hover:border-cta">
-      {/* Фото сверху */}
-      <div className="relative h-48 overflow-hidden">
-        {news.image ? (
-          <Image
+    <article className="bg-card border border-border rounded-lg overflow-hidden hover:border-cta transition-all hover:shadow-lg">
+      {news.image && (
+        <Link href={`/news/${news.slug}`} className="block overflow-hidden">
+          <img
             src={news.image}
             alt={news.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-border/30">
-            <svg className="w-12 h-12 text-copy-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Контент под фото */}
-      <div className="p-5">
-        {/* Категория и дата в одну строку */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-border/30 text-copy-secondary">
+        </Link>
+      )}
+      
+      <div className="p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="px-2 py-1 bg-cta/10 text-cta text-xs font-medium rounded-full">
             {news.category}
           </span>
-          <span className="text-sm text-copy-secondary">
+          <span className="text-xs text-copy-secondary">
             {news.date}
           </span>
-        </div>
-
-        {/* Заголовок */}
-        <h3 className="text-lg font-semibold text-copy-primary mb-3 line-clamp-2 group-hover:text-cta transition-colors">
-          {news.title}
-        </h3>
-
-        {/* Год и ссылка */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-          {news.year && (
-            <span className="text-xs text-copy-secondary">
-              {news.year} год
+          {news.featured && (
+            <span className="text-xs font-medium px-2 py-1 bg-grape/10 text-grape rounded-full">
+              Важное
             </span>
           )}
-          <Link
-            href={`/news/${news.id}`}
-            className="inline-flex items-center text-sm text-cta font-medium hover:text-cta-active transition-colors"
-          >
-            Подробнее
-            <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
         </div>
+        
+        <h3 className="text-xl font-semibold text-copy-primary mb-2 line-clamp-2">
+          <Link href={`/news/${news.slug}`} className="hover:text-cta transition-colors">
+            {news.title}
+          </Link>
+        </h3>
+        
+        <p className="text-copy-secondary mb-4 line-clamp-3">
+          {news.excerpt}
+        </p>
+        
+        <Link
+          href={`/news/${news.slug}`}
+          className="inline-flex items-center text-cta font-medium hover:text-cta-active transition-colors"
+        >
+          Читать далее
+          <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </Link>
       </div>
-    </div>
+    </article>
   );
-};
-
-export default NewsCard;
+}

@@ -1,191 +1,168 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { newsData, type NewsItem } from '@/data/newsData';
+import { NewsItem } from '@/types';
 
-const NewsCarousel = () => {
+interface NewsCarouselProps {
+  news?: NewsItem[]; // делаем проп опциональным
+}
+
+export default function NewsCarousel({ news = [] }: NewsCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  
+  // Если новостей нет, не рендерим компонент
+  if (!news.length) {
+    return null;
+  }
+  
+  // Берем только первые 5 новостей
+  const displayNews = news.slice(0, 5);
+  
+  useEffect(() => {
+    if (!isPlaying || displayNews.length <= 1) return;
     
-  const latestNews = [...newsData]
-    .sort((a, b) => {
-      // Сортируем по году (убывание)
-      if (b.year !== a.year) {
-        return b.year - a.year;
-      }
-      
-      // Если год одинаковый, пытаемся сортировать по дате
-      try {
-        // Преобразуем "15 марта 2024" в Date
-        const parseDate = (dateStr: string) => {
-          const months: Record<string, number> = {
-            'января': 0, 'февраля': 1, 'марта': 2, 'апреля': 3, 'мая': 4, 'июня': 5,
-            'июля': 6, 'августа': 7, 'сентября': 8, 'октября': 9, 'ноября': 10, 'декабря': 11
-          };
-          
-          // Убираем год из строки и парсим
-          const withoutYear = dateStr.replace(/\d{4}$/, '').trim();
-          const parts = withoutYear.split(' ');
-          
-          if (parts.length >= 2) {
-            const day = parseInt(parts[0]);
-            const monthName = parts[1].toLowerCase();
-            const month = months[monthName];
-            
-            if (!isNaN(day) && month !== undefined) {
-              return new Date(a.year, month, day);
-            }
-          }
-          
-          // Если не получилось распарсить, возвращаем дату по умолчанию
-          return new Date(a.year, 0, 1);
-        };
-        
-        return parseDate(b.date).getTime() - parseDate(a.date).getTime();
-      } catch {
-        return 0;
-      }
-    })
-    .slice(0, 7);
-
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % displayNews.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [isPlaying, displayNews.length]);
+  
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
-
+  
   const goToPrev = () => {
-    const isFirstSlide = currentIndex === 0;
-    const newIndex = isFirstSlide ? latestNews.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
+    setCurrentIndex((prev) => (prev === 0 ? displayNews.length - 1 : prev - 1));
   };
-
+  
   const goToNext = () => {
-    const isLastSlide = currentIndex === latestNews.length - 1;
-    const newIndex = isLastSlide ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
+    setCurrentIndex((prev) => (prev + 1) % displayNews.length);
   };
-
-  const currentNews = latestNews[currentIndex];
-
+  
+  if (displayNews.length === 0) return null;
+  
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-card">
-      {/* Заголовок карусели */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-copy-primary">
-            Последние новости
-          </h2>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-copy-secondary">
-              {currentIndex + 1} / {latestNews.length}
-            </span>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={goToPrev}
-                className="p-2 hover:bg-background rounded-full transition-colors"
-                title="Предыдущая"
-              >
-                <svg className="w-5 h-5 text-copy-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={goToNext}
-                className="p-2 hover:bg-background rounded-full transition-colors"
-                title="Следующая"
-              >
-                <svg className="w-5 h-5 text-copy-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Основной контент карусели */}
-      <div className="relative">
-        {/* Слайд */}
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          {/* Изображение */}
-          <div className="relative h-64 lg:h-96 overflow-hidden">
-            {currentNews.image ? (
-              <Image
-                src={currentNews.image}
-                alt={currentNews.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority={currentIndex === 0}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-border/30">
-                <svg className="w-16 h-16 text-copy-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+    <div className="relative bg-card border border-border rounded-lg overflow-hidden">
+      <div className="relative h-[400px] md:h-[500px]">
+        {displayNews.map((item, index) => (
+          <div
+            key={item.id}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            <div className="relative h-full">
+              {item.image && (
+                <div className="absolute inset-0">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                </div>
+              )}
+              
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
+                <div className="max-w-3xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="px-3 py-1 bg-cta text-cta-text text-sm font-medium rounded-full">
+                      {item.category}
+                    </span>
+                    <span className="text-sm text-gray-200">
+                      {item.date}
+                    </span>
+                    {item.featured && (
+                      <span className="text-xs font-medium px-2 py-1 bg-grape/90 text-white rounded-full">
+                        Важное
+                      </span>
+                    )}
+                  </div>
+                  
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3">
+                    {item.title}
+                  </h2>
+                  
+                  <p className="text-gray-200 mb-4 line-clamp-2 md:line-clamp-3">
+                    {item.excerpt}
+                  </p>
+                  
+                  <Link
+                    href={`/news/${item.slug}`}
+                    className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Читать далее
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </Link>
+                </div>
               </div>
-            )}
-            <div className="absolute bottom-4 left-4">
-              <span className="px-3 py-1 bg-cta text-cta-text text-sm font-medium rounded-full">
-                {currentNews.category}
-              </span>
             </div>
           </div>
-
-          {/* Контент */}
-          <div className="p-6 lg:p-8">
-            <div className="mb-4">
-              <span className="text-sm text-copy-secondary">
-                {currentNews.date}
-              </span>
-              <span className="mx-2 text-copy-secondary">•</span>
-              <span className="text-sm text-copy-secondary">
-                {currentNews.year} год
-              </span>
-            </div>
-
-            <h3 className="text-2xl lg:text-3xl font-bold text-copy-primary mb-4">
-              {currentNews.title}
-            </h3>
-
-            <p className="text-copy-secondary mb-6 line-clamp-4">
-              {currentNews.excerpt}
-            </p>
-
-            <div className="flex items-center justify-between">
-              <Link
-                href={`/news/${currentNews.id}`}
-                className="inline-flex items-center px-5 py-3 bg-cta text-cta-text font-medium rounded-lg hover:bg-cta-active transition-colors group"
-              >
-                Читать полностью
-                <svg className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </div>
+        ))}
+        
+        {/* Навигационные кнопки */}
+        {displayNews.length > 1 && (
+          <>
+            <button
+              onClick={goToPrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
-
-      {/* Точки навигации внизу */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center justify-center space-x-3">
-          {latestNews.map((_, index) => (
+      
+      {/* Индикаторы */}
+      {displayNews.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+          {displayNews.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-all ${
                 index === currentIndex
-                  ? 'w-8 h-2 bg-cta rounded-full'
-                  : 'w-2 h-2 bg-border rounded-full hover:bg-copy-secondary'
+                  ? 'w-6 bg-cta'
+                  : 'bg-white/50 hover:bg-white/80'
               }`}
-              aria-label={`Перейти к новости ${index + 1}`}
             />
           ))}
         </div>
-      </div>
+      )}
+      
+      {/* Кнопка паузы/воспроизведения */}
+      {displayNews.length > 1 && (
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+        >
+          {isPlaying ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+        </button>
+      )}
     </div>
   );
-};
-
-export default NewsCarousel;
+}
