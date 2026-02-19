@@ -18,44 +18,6 @@ http://localhost:3000/It_project/projects --> http://localhost:3000/It_project/a
 
 Проблема возникает из-за относительных ссылок в next/link, которые добавляются к текущему пути вместо замены.
 
-## Изменения в коде
-
-В файле `It_project/src/components/Header.tsx`:
-- Изменены href в массиве navItems на абсолютные пути (добавлен ведущий '/').
-- В мобильной навигации удалено принудительное добавление `/${item.href}`, теперь используется item.href напрямую.
-- Для "Контакты" использован '/#contact' для якорной ссылки на главной странице.
-
-Это решает проблему stacking: переходы теперь заменяют путь полностью.
-
-## Пример diff изменений
-
-```diff
-@@ -49,10 +49,10 @@
-     };
- 
-     const navItems = [
--        { name: 'Каталог решений', href: 'projects' },
--        { name: 'О компании', href: 'about' },
--        { name: 'Новости', href: 'news' },
--        { name: 'Контакты', href: '#' }
-+        { name: 'Каталог решений', href: '/projects' },
-+        { name: 'О компании', href: '/about' },
-+        { name: 'Новости', href: '/news' },
-+        { name: 'Контакты', href: '/#contact' }
-     ];
- 
-     if (!mounted) {
-@@ -180,7 +180,7 @@
-                             {navItems.map((item) => (
-                                 <Link
-                                     key={item.name}
--                                    href={item.href.startsWith('#') ? item.href : `/${item.href}`}
-+                                    href={item.href}
-                                     prefetch={false}
-                                     className="py-3 px-4 text-copy-secondary hover:text-cta hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 rounded-lg"
-                                     onClick={() => setIsMenuOpen(false)}
-```
-
 ## Тестирование
 
 После изменений:
