@@ -6,49 +6,49 @@ const directions = [
     title: "Промышленное проектирование",
     description:
       "Проектирование заводов, фабрик, производственных цехов и складских комплексов любой сложности.",
-    icon: "/icons/industrial.svg",
+    icon: "./icons/industrial.svg",
   },
   {
     id: 2,
     title: "Гражданское строительство",
     description:
       "Жилые комплексы, офисные здания, торговые центры и объекты социальной инфраструктуры.",
-    icon: "/icons/civil.svg",
+    icon: "./icons/civil.svg",
   },
   {
     id: 3,
     title: "Транспортная инфраструктура",
     description:
       "Дороги, мосты, тоннели, развязки и транспортные узлы с применением современных технологий.",
-    icon: "/icons/transport.svg",
+    icon: "./icons/transport.svg",
   },
   {
     id: 4,
     title: "Энергетические объекты",
     description:
       "Электростанции, подстанции, котельные и инженерные сети энергоснабжения.",
-    icon: "/icons/energy.svg",
+    icon: "./icons/energy.svg",
   },
   {
     id: 5,
     title: "Гидротехнические сооружения",
     description:
       "Плотины, дамбы, каналы, системы водоснабжения и водоотведения.",
-    icon: "/icons/hydro.svg",
+    icon: "./icons/hydro.svg",
   },
   {
     id: 6,
     title: "Ландшафтное проектирование",
     description:
       "Благоустройство территорий, парки, скверы и рекреационные зоны.",
-    icon: "/icons/landscape.svg",
+    icon: "./icons/landscape.svg",
   },
   {
     id: 7,
     title: "Реконструкция и реставрация",
     description:
       "Восстановление и модернизация существующих зданий и сооружений с сохранением исторического облика.",
-    icon: "/icons/restoration.svg",
+    icon: "./icons/restoration.svg",
   },
 ];
 
