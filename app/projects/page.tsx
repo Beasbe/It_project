@@ -1,36 +1,45 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight, Calendar, MapPin, CheckCircle } from 'lucide-react';
-import { projectsData } from '@/data/projects';
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Calendar, MapPin, CheckCircle } from "lucide-react";
+import { projectsData } from "@/data/projects";
 
 const ProjectsPage = () => {
-  const [filterYear, setFilterYear] = useState<string>('Все');
-  const [filterCategory, setFilterCategory] = useState<string>('Все');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filterYear, setFilterYear] = useState<string>("Все");
+  const [filterCategory, setFilterCategory] = useState<string>("Все");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Получаем уникальные года для фильтра
   const years = useMemo(() => {
-    const uniqueYears = Array.from(new Set(projectsData.map(p => p.year))).sort((a, b) => b - a);
-    return ['Все', ...uniqueYears];
+    const uniqueYears = Array.from(
+      new Set(projectsData.map((p) => p.year)),
+    ).sort((a, b) => b - a);
+    return ["Все", ...uniqueYears];
   }, []);
 
   // Получаем уникальные категории для фильтра
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(projectsData.map(p => p.category)));
-    return ['Все', ...uniqueCategories];
+    const uniqueCategories = Array.from(
+      new Set(projectsData.map((p) => p.category)),
+    );
+    return ["Все", ...uniqueCategories];
   }, []);
 
   // Фильтрация проектов
   const filteredProjects = useMemo(() => {
-    return projectsData.filter(project => {
-      const matchesYear = filterYear === 'Все' || project.year === parseInt(filterYear);
-      const matchesCategory = filterCategory === 'Все' || project.category === filterCategory;
-      const matchesSearch = searchQuery === '' ||
+    return projectsData.filter((project) => {
+      const matchesYear =
+        filterYear === "Все" || project.year === parseInt(filterYear);
+      const matchesCategory =
+        filterCategory === "Все" || project.category === filterCategory;
+      const matchesSearch =
+        searchQuery === "" ||
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.shortDescription
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         project.location.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesYear && matchesCategory && matchesSearch;
@@ -39,9 +48,9 @@ const ProjectsPage = () => {
 
   // Сброс фильтров
   const resetFilters = () => {
-    setFilterYear('Все');
-    setFilterCategory('Все');
-    setSearchQuery('');
+    setFilterYear("Все");
+    setFilterCategory("Все");
+    setSearchQuery("");
   };
 
   return (
@@ -58,26 +67,36 @@ const ProjectsPage = () => {
                 Наши <span className="text-cta">проекты</span>
               </h1>
               <p className="text-xl text-copy-secondary max-w-3xl mx-auto leading-relaxed">
-                Более 10 лет мы реализуем сложные инфраструктурные проекты в области телекоммуникаций,
-                СКС, видеонаблюдения и автоматизации. Здесь вы найдете наш портфолио успешных кейсов.
+                Более 10 лет мы реализуем сложные инфраструктурные проекты в
+                области телекоммуникаций, СКС, видеонаблюдения и автоматизации.
+                Здесь вы найдете наш портфолио успешных кейсов.
               </p>
             </div>
 
             {/* Статистика */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
               <div className="bg-card border border-primary-default rounded-2xl p-6 text-center">
-                <div className="text-4xl font-bold text-cta mb-2">{projectsData.length}+</div>
-                <div className="text-copy-secondary">Реализованных проектов</div>
+                <div className="text-4xl font-bold text-cta mb-2">
+                  {projectsData.length}+
+                </div>
+                <div className="text-copy-secondary">
+                  Реализованных проектов
+                </div>
               </div>
               <div className="bg-card border border-primary-default rounded-2xl p-6 text-center">
                 <div className="text-4xl font-bold text-cta mb-2">
-                  {new Set(projectsData.map(p => p.year)).size}+
+                  {new Set(projectsData.map((p) => p.year)).size}+
                 </div>
                 <div className="text-copy-secondary">Лет успешной работы</div>
               </div>
               <div className="bg-card border border-primary-default rounded-2xl p-6 text-center">
                 <div className="text-4xl font-bold text-cta mb-2">
-                  {new Set(projectsData.filter(p => p.client).map(p => p.client)).size}+
+                  {
+                    new Set(
+                      projectsData.filter((p) => p.client).map((p) => p.client),
+                    ).size
+                  }
+                  +
                 </div>
                 <div className="text-copy-secondary">Довольных клиентов</div>
               </div>
@@ -119,8 +138,10 @@ const ProjectsPage = () => {
                   onChange={(e) => setFilterYear(e.target.value)}
                   className="w-full px-4 py-3 bg-background border border-primary-default rounded-xl focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-all appearance-none"
                 >
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -135,8 +156,10 @@ const ProjectsPage = () => {
                   onChange={(e) => setFilterCategory(e.target.value)}
                   className="w-full px-4 py-3 bg-background border border-primary-default rounded-xl focus:border-cta focus:ring-2 focus:ring-cta/20 outline-none transition-all appearance-none"
                 >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -144,7 +167,10 @@ const ProjectsPage = () => {
 
             <div className="flex justify-between items-center">
               <div className="text-copy-secondary">
-                Найдено проектов: <span className="font-bold text-copy-primary">{filteredProjects.length}</span>
+                Найдено проектов:{" "}
+                <span className="font-bold text-copy-primary">
+                  {filteredProjects.length}
+                </span>
               </div>
               <button
                 onClick={resetFilters}
@@ -169,7 +195,7 @@ const ProjectsPage = () => {
                     className="group bg-card border border-primary-default rounded-2xl overflow-hidden hover:shadow-2xl hover:border-cta/50 transition-all duration-500 h-full flex flex-col"
                   >
                     {/* Верхний блок с годом и категорией */}
-                    <div className="h-48 bg-gradient-to-r from-cta/20 to-grape/20 relative overflow-hidden">
+                    <div className="h-48 bg-gradient-to-red from-cta/20 to-grape/20 relative overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-4xl font-bold text-white/30">
                           {project.title.charAt(0)}
@@ -182,7 +208,9 @@ const ProjectsPage = () => {
                       </div>
                       <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full">
                         <Calendar size={14} className="text-cta" />
-                        <span className="text-sm font-medium">{project.year}</span>
+                        <span className="text-sm font-medium">
+                          {project.year}
+                        </span>
                       </div>
                     </div>
 
@@ -206,7 +234,9 @@ const ProjectsPage = () => {
                         {project.results.slice(0, 2).map((result, index) => (
                           <div key={index} className="flex items-center gap-2">
                             <CheckCircle size={14} className="text-cta" />
-                            <span className="text-sm text-copy-secondary">{result}</span>
+                            <span className="text-sm text-copy-secondary">
+                              {result}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -219,7 +249,10 @@ const ProjectsPage = () => {
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-cta text-white rounded-xl hover:bg-cta-active transition-all duration-300 font-medium group/btn"
                       >
                         <span>Подробнее о проекте</span>
-                        <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                        <ArrowRight
+                          size={18}
+                          className="group-hover/btn:translate-x-1 transition-transform"
+                        />
                       </Link>
                     </div>
                   </div>
@@ -233,7 +266,8 @@ const ProjectsPage = () => {
                 Проекты не найдены
               </h3>
               <p className="text-copy-secondary mb-8 max-w-md mx-auto">
-                Попробуйте изменить параметры фильтрации или введите другой поисковый запрос
+                Попробуйте изменить параметры фильтрации или введите другой
+                поисковый запрос
               </p>
               <button
                 onClick={resetFilters}
@@ -249,13 +283,14 @@ const ProjectsPage = () => {
       {/* CTA секция */}
       <section className="px-4 md:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-r from-cta to-grape rounded-3xl overflow-hidden shadow-2xl">
+          <div className="bg-gradient-to-red from-cta to-grape rounded-3xl overflow-hidden shadow-2xl">
             <div className="p-12 text-center">
               <h2 className="text-4xl font-bold text-white mb-6">
                 Хотите обсудить свой проект?
               </h2>
               <p className="text-white/90 text-xl mb-10 max-w-2xl mx-auto">
-                Наши специалисты готовы проконсультировать вас и предложить оптимальное решение
+                Наши специалисты готовы проконсультировать вас и предложить
+                оптимальное решение
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -263,7 +298,10 @@ const ProjectsPage = () => {
                   className="inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-cta rounded-xl hover:bg-white/90 transition-all duration-300 font-semibold text-lg group"
                 >
                   <span>Обсудить проект</span>
-                  <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight
+                    size={20}
+                    className="group-hover:translate-x-2 transition-transform"
+                  />
                 </Link>
                 <a
                   href="tel:+78001234567"
