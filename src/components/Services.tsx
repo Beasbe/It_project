@@ -1,99 +1,111 @@
-'use client'
+import Image from "next/image";
 
-import { useState } from 'react'
-import servicesData from '@/data/services'
+const services = [
+  {
+    id: 1,
+    title: "Проектирование",
+    description:
+      "Создаем уникальные архитектурные решения, сочетающие эстетику, функциональность и инновационные технологии. Разрабатываем проекты любой сложности.",
+    image: "/service-1.jpg",
+  },
+  {
+    id: 2,
+    title: "Строительство",
+    description:
+      "Проектируем современные инженерные системы: отопление, вентиляцию, водоснабжение, электроснабжение с учетом энергоэффективности.",
+    image: "/service-2.jpg",
+  },
+  {
+    id: 3,
+    title: "Эксплуатация",
+    description:
+      "Создаем фотореалистичные 3D-визуализации и интерактивные модели будущих объектов для наглядной презентации проектов.",
+    image: "/service-3.jpg",
+  },
+  {
+    id: 4,
+    title: "BIM-проектирование",
+    description:
+      "Обеспечиваем контроль соответствия строительных работ проектной документации на всех этапах строительства.",
+    image: "/service-4.jpg",
+  },
+];
 
-const Services = () => {
-    const [activeService, setActiveService] = useState<number | null>(null)
-    
-    // По умолчанию показываем первый сервис
-    const defaultService = servicesData[0]
+export default function Services() {
+  return (
+    <section className="w-full py-12 md:py-16 lg:py-24 bg-background">
+      <div className="container mx-auto px-4">
+        {/* Заголовок */}
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-copy-primary text-center mb-10 md:mb-12 lg:mb-16">
+          Виды деятельности
+        </h2>
 
-    return (
-        <section className="py-16 bg-background">
-            <div className="px-4">
-
-                <div className="text-center">
-                    <p className="text-4xl md:text-5xl text-copy-primary mb-8">
-                        IT решения для вашего бизнеса
-                    </p>
-                    <p className="text-lg text-copy-secondary mb-12">
-                        Комплексные услуги для цифровизации вашей компании
-                    </p>
-                </div>
-
-                <div className="flex flex-col lg:flex-row gap-8">
-
-                    {/* Левая колонка - сетка услуг */}
-                    <div className="lg:w-1/2">
-                        <div className="h-full">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {servicesData.map((service) => (
-                                    <button
-                                        key={service.id}
-                                        className={`border border-primary-default rounded-xl p-8 relative transition-all duration-300 hover:scale-[1.02] hover:shadow-lg min-h-[120px] flex flex-col justify-center ${
-                                            activeService === service.id
-                                                ? 'bg-cta text-cta-text transform scale-[1.02] shadow-lg'
-                                                : 'bg-card text-copy-primary'
-                                        }`}
-                                        onMouseEnter={() => setActiveService(service.id)}
-                                        onMouseLeave={() => setActiveService(null)}
-                                        onClick={() => setActiveService(service.id)}
-                                    >
-                                        <h3 className="text-lg md:text-xl font-semibold uppercase tracking-wide text-center">
-                                            {service.title}
-                                        </h3>
-                                        {activeService === service.id && (
-                                            <div className="mt-2 flex justify-center">
-                                                <div className="w-6 h-1 bg-cta-text rounded-full"></div>
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Правая колонка - детали услуги */}
-                    <div className="lg:w-1/2">
-                        <div className="sticky top-8">
-                            <div className={`border border-primary-default rounded-xl p-8 bg-card shadow-lg transition-all duration-500 min-h-[400px] flex flex-col justify-center`}>
-                                {activeService !== null ? (
-                                    <div className="animate-fadeIn">
-                                        <div className="mb-6">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-2 h-6 bg-cta rounded-full"></div>
-                                            </div>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-copy-primary uppercase tracking-wide">
-                                                {servicesData.find(s => s.id === activeService)?.title}
-                                            </h3>
-                                        </div>
-
-                                        <div className="mb-8">
-                                            <p className="text-lg text-copy-secondary leading-relaxed">
-                                                {servicesData.find(s => s.id === activeService)?.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center p-8">
-                                        <div className="mb-6">
-                                            <span className="text-2xl text-copy-primary mb-3">
-                                                {defaultService.title}
-                                            </span>
-                                        </div>
-                                        <p className="text-lg text-copy-secondary leading-relaxed">
-                                            {defaultService.description}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    )
+        {/* Карточки услуг */}
+        <div className="flex flex-col items-center space-y-6 md:space-y-8 lg:space-y-10">
+          {services.map((service, index) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              imagePosition={index % 2 === 0 ? "left" : "right"}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-export default Services
+function ServiceCard({
+  service,
+  imagePosition,
+}: {
+  service: (typeof services)[0];
+  imagePosition: "left" | "right";
+}) {
+  return (
+    <div className="w-full max-w-4xl lg:max-w-5xl mx-auto">
+      <div
+        className={`
+          bg-card shadow-md overflow-hidden border border-border
+          transition-all duration-500 ease-out
+          hover:shadow-xl hover:scale-[1.02] hover:border-cta/30
+          group
+        `}
+      >
+        <div
+          className={`
+          flex flex-col
+          ${imagePosition === "left" ? "lg:flex-row" : "lg:flex-row-reverse"}
+          items-stretch
+        `}
+        >
+          {/* Блок с фото */}
+          <div className="relative w-full lg:w-1/2 h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden">
+            <Image
+              src={service.image}
+              alt={service.title}
+              fill
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+            {/* Затемнение при наведении для лучшей читаемости текста (опционально) */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+          </div>
+
+          {/* Блок с текстом */}
+          <div className="w-full lg:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center text-center">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-copy-primary mb-3 md:mb-4 transition-colors duration-300 group-hover:text-cta">
+              {service.title}
+            </h3>
+            <p className="text-sm sm:text-base md:text-lg text-copy-secondary leading-relaxed max-w-md">
+              {service.description}
+            </p>
+
+            {/* Декоративная линия при наведении (опционально) */}
+            <div className="w-12 h-0.5 bg-cta/0 group-hover:bg-cta/50 mt-4 transition-all duration-500 group-hover:w-20" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
