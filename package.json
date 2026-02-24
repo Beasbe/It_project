@@ -13,6 +13,7 @@
     "deploy:gh": "yarn build && yarn deploy"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.1.18",
     "lucide-react": "^0.562.0",
     "next": "^16.1.6",

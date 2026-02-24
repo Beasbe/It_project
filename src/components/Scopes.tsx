@@ -1,54 +1,63 @@
-import Image from "next/image";
+import {
+  BuildingOfficeIcon,
+  HomeModernIcon,
+  TruckIcon,
+  BoltIcon,
+  BeakerIcon,
+  SunIcon,
+  WrenchScrewdriverIcon,
+} from "@heroicons/react/24/outline";
 
+// Массив с направлениями (убираем поле icon, добавляем component)
 const directions = [
   {
     id: 1,
     title: "Промышленное проектирование",
     description:
       "Проектирование заводов, фабрик, производственных цехов и складских комплексов любой сложности.",
-    icon: "./icons/industrial.svg",
+    icon: BuildingOfficeIcon, // Передаем компонент иконки
   },
   {
     id: 2,
     title: "Гражданское строительство",
     description:
       "Жилые комплексы, офисные здания, торговые центры и объекты социальной инфраструктуры.",
-    icon: "./icons/civil.svg",
+    icon: HomeModernIcon,
   },
   {
     id: 3,
     title: "Транспортная инфраструктура",
     description:
       "Дороги, мосты, тоннели, развязки и транспортные узлы с применением современных технологий.",
-    icon: "./icons/transport.svg",
+    icon: TruckIcon,
   },
   {
     id: 4,
     title: "Энергетические объекты",
     description:
       "Электростанции, подстанции, котельные и инженерные сети энергоснабжения.",
-    icon: "./icons/energy.svg",
+    icon: BoltIcon,
   },
   {
     id: 5,
     title: "Гидротехнические сооружения",
     description:
       "Плотины, дамбы, каналы, системы водоснабжения и водоотведения.",
-    icon: "./icons/hydro.svg",
+    icon: BeakerIcon,
   },
   {
     id: 6,
     title: "Ландшафтное проектирование",
     description:
       "Благоустройство территорий, парки, скверы и рекреационные зоны.",
-    icon: "./icons/landscape.svg",
+    icon: SunIcon,
   },
   {
     id: 7,
     title: "Реконструкция и реставрация",
     description:
       "Восстановление и модернизация существующих зданий и сооружений с сохранением исторического облика.",
-    icon: "./icons/restoration.svg",
+    icon: WrenchScrewdriverIcon,
   },
 ];
 
@@ -61,7 +70,7 @@ export default function Directions() {
           Направления работ
         </h2>
 
-        {/* Сетка карточек с центрированием */}
+        {/* Сетка карточек */}
         <div className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-5xl mx-auto">
           {directions.map((direction) => (
             <div
@@ -78,6 +87,8 @@ export default function Directions() {
 }
 
 function DirectionCard({ direction }: { direction: (typeof directions)[0] }) {
+  const IconComponent = direction.icon;
+
   return (
     <div
       className="
@@ -91,11 +102,11 @@ function DirectionCard({ direction }: { direction: (typeof directions)[0] }) {
       hover:shadow-xl hover:scale-[1.02] hover:border-cta/30
       group
       relative
-      min-h-[280px] sm:min-h-[300px] md:min-h-[320px]  /* Фиксированная минимальная высота */
+      min-h-[280px] sm:min-h-[300px] md:min-h-[320px]
       h-auto
     "
     >
-      {/* Иконка на верхней грани */}
+      {/* Иконка на верхней грани - теперь перекрывает границу */}
       <div
         className="
         absolute
@@ -103,26 +114,20 @@ function DirectionCard({ direction }: { direction: (typeof directions)[0] }) {
         left-1/2
         transform -translate-x-1/2
         w-16 h-16
-        bg-card
+        bg-white
         rounded-full
         shadow-md
         border border-border
         flex items-center justify-center
         transition-all duration-300
         group-hover:shadow-lg group-hover:border-cta/30 group-hover:scale-110
+        z-10  /* Поднимаем иконку выше */
       "
       >
-        <div className="relative w-8 h-8">
-          <Image
-            src={direction.icon}
-            alt={direction.title}
-            fill
-            className="object-contain transition-transform duration-300 group-hover:scale-110"
-          />
-        </div>
+        <IconComponent className="w-8 h-8 text-copy-primary group-hover:text-cta transition-colors duration-300" />
       </div>
 
-      {/* Контент карточки с отступом для иконки */}
+      {/* Контент карточки */}
       <div className="mt-6 flex flex-col flex-grow">
         <h3 className="text-xl md:text-2xl font-bold text-copy-primary mb-3 transition-colors duration-300 group-hover:text-cta">
           {direction.title}
