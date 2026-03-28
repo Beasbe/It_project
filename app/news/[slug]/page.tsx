@@ -159,7 +159,7 @@ export default async function NewsDetail({ params }: PageProps) {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-copy-primary mb-6">
             {newsItem.title}
           </h1>
-          <p className="text-lg text-copy-secondary">{newsItem.excerpt}</p>
+          <div className="text-lg text-copy-secondary">{newsItem.excerpt}</div>
         </div>
 
         {/* Изображение */}

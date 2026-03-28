@@ -1,4 +1,3 @@
-// Тип новости
 export interface NewsItem {
   id: number;
   title: string;
@@ -14,7 +13,6 @@ export interface NewsItem {
   updated_at?: string;
 }
 
-// Тип проекта
 export interface ProjectItem {
   id: number;
   title: string;
@@ -31,7 +29,6 @@ export interface ProjectItem {
   updated_at?: string;
 }
 
-// Тип для ответа от API
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -44,7 +41,6 @@ export interface ApiResponse<T> {
   };
 }
 
-// Тип для ответа с одной новостью
 export interface NewsItemResponse {
   data: NewsItem;
   related: {
