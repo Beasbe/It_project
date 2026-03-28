@@ -117,11 +117,6 @@ export default async function NewsDetail({ params }: PageProps) {
   return (
     <div className="min-h-screen py-8 md:py-12 px-4 md:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Источник данных */}
-        <div className="mb-4">
-          <DataSourceBadge isBackendAvailable={isBackendAvailable} />
-        </div>
-
         {/* Кнопка назад */}
         <Link
           href="/news"
@@ -149,7 +144,13 @@ export default async function NewsDetail({ params }: PageProps) {
             <span className="px-3 py-1 bg-cta text-cta-text text-sm font-medium rounded-full">
               {newsItem.category}
             </span>
-            <span className="text-sm text-copy-secondary">{newsItem.date}</span>
+            <span className="text-sm text-copy-secondary">
+              {new Date(newsItem.date).toLocaleDateString("ru-RU", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </span>
             {newsItem.featured && (
               <span className="text-xs font-medium px-2 py-1 bg-grape/10 text-grape rounded-full">
                 Важное
@@ -177,9 +178,10 @@ export default async function NewsDetail({ params }: PageProps) {
         {/* Контент */}
         <div className="prose prose-lg max-w-none mb-12">
           <div className="bg-card border border-border rounded-lg p-6 md:p-8">
-            <div className="text-lg text-copy-primary leading-relaxed whitespace-pre-line">
-              {newsItem.content}
-            </div>
+            <div
+              className="text-copy-primary leading-relaxed news-content"
+              dangerouslySetInnerHTML={{ __html: newsItem.content }}
+            />
           </div>
         </div>
 

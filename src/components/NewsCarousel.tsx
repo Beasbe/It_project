@@ -182,7 +182,7 @@ export default function NewsCarousel({ news = [] }: NewsCarouselProps) {
       )}
 
       {/* Кнопка паузы/воспроизведения */}
-      {displayNews.length > 1 && (
+      {/*{displayNews.length > 1 && (
         <button
           onClick={() => setIsPlaying(!isPlaying)}
           className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
@@ -223,7 +223,7 @@ export default function NewsCarousel({ news = [] }: NewsCarouselProps) {
             </svg>
           )}
         </button>
-      )}
+      )}*/}
     </div>
   );
 }

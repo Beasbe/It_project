@@ -49,8 +49,6 @@ const Header = () => {
   };
 
   const navItems = [
-    { name: "Виды деятельности", href: "/#contact" },
-    { name: "Направления работ", href: "/projects" },
     { name: "Наши работы", href: "/projects" },
     { name: "Партнёры", href: "/projects" },
     { name: "Новости", href: "/news" },
