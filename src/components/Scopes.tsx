@@ -8,14 +8,14 @@ import {
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 
-// Массив с направлениями (убираем поле icon, добавляем component)
+// Массив с направлениями
 const directions = [
   {
     id: 1,
     title: "Промышленное проектирование",
     description:
       "Проектирование заводов, фабрик, производственных цехов и складских комплексов любой сложности.",
-    icon: BuildingOfficeIcon, // Передаем компонент иконки
+    icon: BuildingOfficeIcon,
   },
   {
     id: 2,
@@ -63,24 +63,22 @@ const directions = [
 
 export default function Directions() {
   return (
-    <section className="w-full py-16 md:py-24 bg-background">
-      <div className="container mx-auto px-4">
-        {/* Заголовок */}
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-copy-primary text-center mb-12 md:mb-16">
-          Направления работ
-        </h2>
+    <section className="py-12 md:py-16 bg-background transition-theme">
+      {/* Заголовок */}
+      <h2 className="text-2xl md:text-3xl font-bold text-copy-primary text-center mb-8 md:mb-12 transition-colors duration-300">
+        Направления работ
+      </h2>
 
-        {/* Сетка карточек */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-5xl mx-auto">
-          {directions.map((direction) => (
-            <div
-              key={direction.id}
-              className="w-full sm:w-[calc(50%-1rem)] max-w-md"
-            >
-              <DirectionCard direction={direction} />
-            </div>
-          ))}
-        </div>
+      {/* Сетка карточек */}
+      <div className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-5xl mx-auto px-4">
+        {directions.map((direction) => (
+          <div
+            key={direction.id}
+            className="w-full sm:w-[calc(50%-1rem)] max-w-md"
+          >
+            <DirectionCard direction={direction} />
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -90,52 +88,24 @@ function DirectionCard({ direction }: { direction: (typeof directions)[0] }) {
   const IconComponent = direction.icon;
 
   return (
-    <div
-      className="
-      w-full
-      bg-card
-      shadow-md
-      border border-border
-      p-6 md:p-8
-      flex flex-col items-center text-center
-      transition-all duration-300 ease-out
-      hover:shadow-xl hover:scale-[1.02] hover:border-cta/30
-      group
-      relative
-      min-h-[280px] sm:min-h-[300px] md:min-h-[320px]
-      h-auto
-    "
-    >
-      {/* Иконка на верхней грани - теперь перекрывает границу */}
-      <div
-        className="
-        absolute
-        -top-8
-        left-1/2
-        transform -translate-x-1/2
-        w-16 h-16
-        bg-white
-        rounded-full
-        shadow-md
-        border border-border
-        flex items-center justify-center
-        transition-all duration-300
-        group-hover:shadow-lg group-hover:border-cta/30 group-hover:scale-110
-        z-10  /* Поднимаем иконку выше */
-      "
-      >
-        <IconComponent className="w-8 h-8 text-copy-primary group-hover:text-cta transition-colors duration-300" />
+    <div className="group relative bg-card border border-default border-border pt-8 pb-6 px-6 h-full transition-theme hover:border-cta hover:shadow-lg">
+      {/* Иконка с фоном - перекрывает верхнюю границу */}
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-cta text-cta-text p-3 rounded-lg shadow-md z-10 transition-colors duration-300">
+        <IconComponent className="w-6 h-6" />
       </div>
 
       {/* Контент карточки */}
-      <div className="mt-6 flex flex-col flex-grow">
-        <h3 className="text-xl md:text-2xl font-bold text-copy-primary mb-3 transition-colors duration-300 group-hover:text-cta">
+      <div className="flex flex-col flex-grow">
+        <h3 className="text-xl md:text-2xl font-bold text-copy-primary mb-3 text-center transition-colors duration-300 group-hover:text-cta">
           {direction.title}
         </h3>
-        <p className="text-sm md:text-base text-copy-secondary leading-relaxed">
+        <p className="text-sm md:text-base text-copy-secondary leading-relaxed text-center">
           {direction.description}
         </p>
       </div>
+
+      {/* Декоративная линия */}
+      <div className="mt-4 h-1 w-12 bg-cta rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 mx-auto" />
     </div>
   );
 }

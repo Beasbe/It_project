@@ -81,7 +81,7 @@ const Header = () => {
           {/* Навигация с отступами */}
           <nav
             role="navigation"
-            className="flex items-center gap-8 space-x-10 m-6"
+            className="flex text-2xl items-center gap-8 space-x-10 m-6"
           >
             {navItems.map((item) => (
               <Link
@@ -140,7 +140,7 @@ const Header = () => {
           </div>
 
           {/* Переключатель темы с анимацией */}
-          {/*<div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-6">
             <button
               onClick={toggleTheme}
               disabled={isAnimating}
@@ -167,8 +167,8 @@ const Header = () => {
                     }`}
                   />
                 )}
-              </div>*/}
-          {/*<div
+              </div>
+              <div
                 className="absolute inset-0 rounded-full opacity-0 hover:opacity-20 transition-opacity duration-300"
                 style={{
                   background: isDark
@@ -177,7 +177,7 @@ const Header = () => {
                 }}
               ></div>
             </button>
-          </div>*/}
+          </div>
         </div>
 
         {/* Для мобилки - отдельная структура */}
