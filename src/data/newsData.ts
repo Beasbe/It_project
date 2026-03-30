@@ -11,7 +11,7 @@ export const newsData: NewsItem[] = [
     year: 2024,
     featured: true,
     image: "../public/i.jpg",
-    slug: "zapusk-novogo-produkta", // обязательно
+    slug: "zapusk-novogo-produkta",
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ export const newsData: NewsItem[] = [
     year: 2023,
     featured: false,
     image: "/images/news/new-office.jpg",
-    slug: "otkrytie-novogo-ofisa", // обязательно
+    slug: "otkrytie-novogo-ofisa",
   },
 ];
 export default newsData;
