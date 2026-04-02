@@ -50,7 +50,7 @@ const Header = () => {
 
   const navItems = [
     { name: "Наши работы", href: "/projects" },
-    { name: "Партнёры", href: "/projects" },
+    { name: "Партнёры", href: "/partners" },
     { name: "Новости", href: "/news" },
     { name: "О компании", href: "/about" },
   ];

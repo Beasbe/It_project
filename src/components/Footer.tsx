@@ -136,12 +136,6 @@ const Footer = () => {
               >
                 Политика конфиденциальности
               </Link>
-              <Link
-                href="/terms"
-                className="text-copy-secondary hover:text-cta text-sm transition-colors duration-200"
-              >
-                Условия использования
-              </Link>
             </div>
           </div>
         </div>

@@ -103,7 +103,7 @@ export default function Hero() {
                 isVideoVisible && !isVideoLoading ? "visible" : "hidden",
             }}
           >
-            <source src="./anim_1.mp4" type="video/mp4" />
+            <source src="./movieeq.mp4" type="video/mp4" />
             {/* WebM формат для лучшей совместимости */}
             Ваш браузер не поддерживает видео.
           </video>

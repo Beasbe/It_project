@@ -65,7 +65,7 @@ export default function Directions() {
   return (
     <section className="py-12 md:py-16 bg-background transition-theme">
       {/* Заголовок */}
-      <h2 className="text-2xl md:text-3xl font-bold text-copy-primary text-center mb-8 md:mb-12 transition-colors duration-300">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-copy-primary text-center mb-10 md:mb-12 lg:mb-16">
         Направления работ
       </h2>
 
