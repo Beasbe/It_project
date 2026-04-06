@@ -59,9 +59,8 @@ function ProjectCard({ project }: ProjectCardProps) {
             {project.category}
           </span>
         </div>
-        <div className="absolute top-3 md:top-4 right-3 md:right-4 flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm">
-          <Calendar size={12} className="text-cta" />
-          <span className="text-xs md:text-sm font-medium text-copy-primary">
+        <div className="absolute top-3 md:top-4 right-3 md:right-4 flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 bg-cta backdrop-blur-sm rounded-full shadow-sm">
+          <span className="text-xs md:text-sm font-medium text-cta-text">
             {project.year}
           </span>
         </div>

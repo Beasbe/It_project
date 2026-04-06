@@ -1,32 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Включает статический экспорт
+  output: "standalone", // вместо 'export'
   images: {
-    unoptimized: true, // Нужно для GitHub Pages
+    // Для standalone можно оставить remotePatterns, убрать unoptimized (опционально)
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "images.unsplash.com",
       },
       {
-        protocol: 'https',
-        hostname: '**.unsplash.com',
-        pathname: '/**',
-      },
-      // Добавь другие хосты если нужно
-      {
-        protocol: 'https',
-        hostname: '**',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "**.unsplash.com",
       },
     ],
   },
+  // Если нужен basePath — оставьте, но для standalone обычно не требуется, если не хостите в подпапке
+  // basePath: '/It_project',
+  // trailingSlash: true,
+};
 
-  basePath: '/It_project',
-  trailingSlash: true,
-
-
-}
-
-module.exports = nextConfig
+module.exports = nextConfig;

@@ -51,7 +51,7 @@ export default function Hero() {
         {isVideoLoading && !hasError && (
           <div className="relative w-full h-full">
             <Image
-              src="./service-4.webp"
+              src="/service-4.webp"
               alt="Загрузка видео..."
               fill
               className="object-cover"
@@ -77,7 +77,7 @@ export default function Hero() {
         {hasError && (
           <div className="relative w-full h-full">
             <Image
-              src="./service-4.webp"
+              src="/service-4.webp"
               alt="Строительная индустрия"
               fill
               className="object-cover"

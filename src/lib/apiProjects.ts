@@ -1,7 +1,10 @@
 // src/lib/apiProjects.ts
 import { ProjectItem, ApiResponse, ProjectItemResponse } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  typeof window === "undefined"
+    ? process.env.API_URL
+    : process.env.NEXT_PUBLIC_API_URL;
 const API_TIMEOUT = 5000;
 
 // Универсальная функция fetch с таймаутом
