@@ -4,7 +4,7 @@
 import React, { Suspense, useState } from "react";
 import Image from "next/image";
 
-// Данные о партнёрах с правильными путями к изображениям
+// Данные о партнёрах — исправлены пути к изображениям (файлы должны лежать в public/partners/)
 const partnersData = [
   {
     id: 1,
@@ -12,7 +12,7 @@ const partnersData = [
     shortName: "LightCom Калуга",
     description:
       "Лайт Коммуникейшн Калуга — это первая компания группы Lightcom в калужском регионе. К настоящему моменту она существует уже около 10 лет. Специализируется на поставке оборудования для проектов СКУД, СКС, видеонаблюдения, телефонизации и других.",
-    logo: "./lightcom.jpg",
+    logo: "/partners/lightcom.jpg",
     sticker: "💡",
     website: "https://www.lc-kaluga.ru/",
     tags: ["Поставка оборудования", "СКУД", "Видеонаблюдение"],
@@ -23,7 +23,7 @@ const partnersData = [
     shortName: "Умный дом",
     description:
       "Подразделение компании «Лайт ПРОЕКТ», которое занимается оснащением умных домов. Специализируется на работе с частными заказчиками, предлагая современные решения автоматизации и комфорта.",
-    logo: "./smarthome.jpg",
+    logo: "/partners/smarthome.jpg",
     sticker: "🏠",
     website: "#",
     tags: ["Умный дом", "Частным клиентам", "Автоматизация"],
@@ -34,7 +34,7 @@ const partnersData = [
     shortName: "КОДОС",
     description:
       "КОДОС — российский производитель систем безопасности. Под брендом КОДОС производится продукция для организации систем контроля и управления доступом, охранно-пожарной сигнализации, а также цифрового видеонаблюдения.",
-    logo: "./kodos.png",
+    logo: "/partners/kodos.png",
     sticker: "🔒",
     website: "https://kodos.ru/",
     tags: ["Производство", "СКУД", "ОПС", "Видеонаблюдение"],
@@ -45,7 +45,7 @@ const partnersData = [
     shortName: "ДевЛайн",
     description:
       "Компания «ДевЛайн» — российский разработчик и производитель цифровой системы видеонаблюдения под брендом «Лини». Центральный офис находится в Краснодаре. Дилерская сеть распространена по всей России и СНГ. Мы являемся официальным дилером ДевЛайн.",
-    logo: "./devline.jpg",
+    logo: "/partners/devline.jpg",
     sticker: "📹",
     website: "https://devline.ru/",
     tags: ["Производитель", "Видеонаблюдение", "Дилер"],
@@ -64,6 +64,15 @@ function PartnerImage({
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  // Если путь к логотипу отсутствует — сразу показываем стикер
+  if (!logo) {
+    return (
+      <div className="relative w-14 h-14 rounded-xl bg-cta/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <span className="text-3xl">{sticker}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-14 h-14 rounded-xl bg-cta/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
       {/* Состояние загрузки */}
@@ -73,7 +82,7 @@ function PartnerImage({
         </div>
       )}
 
-      {/* Ошибка загрузки - показываем стикер */}
+      {/* Ошибка загрузки — показываем стикер */}
       {hasError && <span className="text-3xl">{sticker}</span>}
 
       {/* Изображение */}

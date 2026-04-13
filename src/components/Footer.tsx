@@ -2,18 +2,19 @@
 import React from "react";
 import Link from "next/link";
 
+const currentYear = new Date().getFullYear();
 const Footer = () => {
   const navigationLinks = [
-    { name: "Каталог решений", href: "/catalog" },
+    { name: "Каталог решений", href: "/projects" },
     { name: "О компании", href: "/about" },
     { name: "Новости", href: "/news" },
     { name: "Контакты", href: "/contacts" },
   ];
 
   const contactInfo = {
-    address: "г. Москва, ул. Примерная, д. 123, офис 456",
-    phone: "+7 (999) 123-45-67",
-    email: "info@company.ru",
+    address: "г. Калуга, Калужского Ополчения, 2, оф.10",
+    phone: "+7 (4842) 77-00-44",
+    email: "zakaz@lc-kaluga.ru",
     workingHours: "Пн-Пт: 9:00-18:00",
   };
 
@@ -127,7 +128,7 @@ const Footer = () => {
         <div className="mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-copy-secondary text-sm">
-              © 2026 IT Project. Все права защищены.
+              © {currentYear} IT Project. Все права защищены.
             </p>
             <div className="flex gap-6">
               <Link
