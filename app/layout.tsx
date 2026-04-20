@@ -1,22 +1,27 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import Header from '../src/components/Header'
-import Footer from '../src/components/Footer'
-import ThemeTransitionProvider from '../src/components/ThemeTransitionProvider'
-import { ThemeProvider } from 'next-themes'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import Header from "../src/components/Header";
+import Footer from "../src/components/Footer";
+import ThemeTransitionProvider from "../src/components/ThemeTransitionProvider";
+import { ThemeProvider } from "next-themes";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Your Project',
-  description: 'Description',
-}
+  title: "АйТи Проект",
+  description: "Системный Интегратор",
+  icons: {
+    icon: "/globe.svg",
+    shortcut: "/favicon-16x16.png",
+    apple: "/favicon-16x16.png",
+  },
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -38,5 +43,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
