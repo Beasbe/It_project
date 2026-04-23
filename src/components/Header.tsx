@@ -70,8 +70,8 @@ const Header = () => {
             href="/"
             className="flex items-center space-x-2 group cursor-pointer no-underline"
           >
-            <div className="h-10 w-10 bg-cta rounded flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-              <span className="text-cta-text font-bold text-lg">IT</span>
+            <div className="h-17 w-18 bg-white rounded-3xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+              <img src="/globe.svg" alt="Globe" className="w-18 h-18" />
             </div>
             <span className="text-xl font-bold text-copy-primary transition-all duration-300 group-hover:text-cta">
               АйТи ПРОЕКТ

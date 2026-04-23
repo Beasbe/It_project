@@ -27,13 +27,13 @@
    ============================================ */
 :root,
 .light {
-    --color-grape: oklch(0.65 0.2 225);
+    --color-grape: oklch(0.6928 0.1771 58.66);
     --color-background: oklch(0.96 0 0);
     --color-border: oklch(0.83 0 0);
     --color-card: oklch(1 0 0);
     --color-copy-primary: oklch(0.15 0 0);
     --color-copy-secondary: oklch(0.5 0 0);
-    --color-cta: oklch(0.65 0.15 220);
+    --color-cta: oklch(0.6928 0.1771 58.66);
     --color-cta-active: oklch(0.72 0.3 15);
     --color-cta-text: oklch(1 0 0);
     background-color: var(--color-background);
@@ -43,15 +43,18 @@
    DARK THEME
    ============================================ */
 .dark {
-    --color-grape: oklch(0.65 0.2 280);
-    --color-background: oklch(0.15 0 0);
-    --color-border: oklch(0.35 0 0);
-    --color-card: oklch(0.25 0 0);
-    --color-copy-primary: oklch(0.95 0 0);
-    --color-copy-secondary: oklch(0.7 0 0);
-    --color-cta: oklch(0.55 0.3 275);
-    --color-cta-active: oklch(0.65 0.25 270);
+    --color-grape: oklch(0.6928 0.1771 58.66);
+    --color-orange: oklch(0.75 0.18 58.66);
+
+    --color-background: oklch(0.22 0 0);
+    --color-border: oklch(0.45 0 0);
+    --color-card: oklch(0.32 0 0);
+    --color-copy-primary: oklch(0.98 0 0);
+    --color-copy-secondary: oklch(0.82 0 0);
+    --color-cta: oklch(0.75 0.18 58.66);
+    --color-cta-active: oklch(0.68 0.22 58.66);
     --color-cta-text: oklch(1 0 0);
+
     background-color: var(--color-background);
 }
 
