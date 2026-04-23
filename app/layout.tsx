@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description: "Системный Интегратор",
   icons: {
     icon: "/globe.svg",
-    shortcut: "/favicon-16x16.png",
-    apple: "/favicon-16x16.png",
+    shortcut: "/globe.svg",
+    apple: "/globe.svg",
   },
 };
 
