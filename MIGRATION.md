@@ -56,7 +56,7 @@ Runner должен иметь доступ к kubeconfig кластера k3s.
 В CI образы публикуются автоматически в
 `ghcr.io/<org>/<repo-lowercase>/{backend,frontend}` (первый запуск создаст
 пакеты; имя репозитория приводится к нижнему регистру — GHCR не принимает
-заглавные, `khakaton_MTS` → `khakaton_mts`). Пакеты связаны с публичным
+заглавные, например `It_project` → `it_project`). Пакеты связаны с публичным
 репозиторием — анонимный `docker pull` работает без авторизации (проверено).
 В `helm/values.yaml` строка `registry` переопределяется в CI через
 `--set registry=ghcr.io/<repo-lowercase>`.

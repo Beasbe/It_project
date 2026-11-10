@@ -21,7 +21,7 @@
 ## 2. Реализованные изменения
 
 1. **GHCR-ссылки** в workflow параметризованы: путь репозитория приводится к
-   lowercase (`khakaton_MTS` → `khakaton_mts`, шаг «Compute lowercase repository
+   lowercase (`It_project` → `it_project`, шаг «Compute lowercase repository
    path» в `ci.yml`/`deploy.yml`) — GHCR не принимает заглавные буквы в имени
    образа; автоматически адаптируется к новому репозиторию.
 2. **`NEXT_PUBLIC_API_URL`** — через Variable `NEXT_PUBLIC_API_URL` (без хардкода IP).

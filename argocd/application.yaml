@@ -20,14 +20,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Beasbe/khakaton_MTS.git
+    repoURL: https://github.com/Beasbe/It_project.git
     targetRevision: main
     path: helm
     helm:
       values: |
-        registry: ghcr.io/beasbe/khakaton_mts
+        registry: ghcr.io/beasbe/it_project
         image:
-          tag: 1c087eab988975c68f53a043046a76b10ae7855b
+          tag: latest
         secrets:
           existingSecret: true
   destination:
