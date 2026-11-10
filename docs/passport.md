@@ -92,13 +92,13 @@ kubectl exec -it -n full-proj deploy/backend -c backend -- php artisan make:fila
 
 ### Обязательная часть
 
-| Требование кейса | Как реализовано | Обоснование | Как проверить |
+| Требование | Как реализовано | Обоснование | Как проверить |
 |---|---|---|---|
 | Веб-приложение в Kubernetes | Deployments backend(+nginx+exporter)/frontend/mysql, PVC, Secret `app-secrets`, миграции | стандартные ресурсы, минимальный стек | `kubectl get pods -n full-proj`; `curl localhost:30080/api/news` → 200 JSON |
 | Доступ через Gateway API | Traefik v3: GatewayClass + Gateway (HTTP :80 → 302-редирект, HTTPS :443) + HTTPRoute → Service waf | open-source, без вендор-лока; Gateway API v1.5.1 | `kubectl get gateway -n full-proj` (PROGRAMMED=True); `curl -sk https://localhost:30443/api/news` → 200 |
 | Prometheus собирает метрики | prometheus-чарт + node-exporter + kube-state-metrics + sidecar nginx-exporter (аннотации) | метрики и инфраструктуры, и приложения | `kubectl port-forward -n monitoring svc/prometheus-server 9090:80`; `curl localhost:9090/api/v1/query?query=up`; `nginx_http_requests_total` |
 | Fluent Bit собирает логи | DaemonSet Fluent Bit (CRI-парсер) → Loki single-binary | лёгкий сборщик, централизованное хранилище | после `curl` к приложению: Loki API `{namespace="full-proj"}` содержит access-лог |
-| Ubuntu 24.04 | весь стенд развёрнут на Ubuntu 24.04.5 LTS | требование кейса | воспроизведение по `deploy.sh` |
+| Ubuntu 24.04 | весь стенд развёрнут на Ubuntu 24.04.5 LTS | требование | воспроизведение по `deploy.sh` |
 | Автоматизация | `deploy.sh` (7 шагов, Helm из OCI, Argo CD); повторный запуск идемпотентен | минимум команд, воспроизводимость | `./scripts/deploy.sh` повторно → «has been upgraded», без ошибок |
 
 ### Дополнительные улучшения
@@ -155,11 +155,11 @@ kubectl exec -it -n full-proj deploy/backend -c backend -- php artisan make:fila
 персистятся между запросами (проверено экспериментально), поэтому rate-limit
 реализован на nginx `limit_req` (ADR-4 в `waf/SPEC.md`).
 
-В файле serial.md расписаны все проблемы и варианты решений, которые были реализованы от старта хакатона.
+В файле serial.md расписаны все проблемы и варианты решений, которые были реализованы от старта проекта.
 
 **Предложения по дальнейшему развитию:**
 
-1. kubeadm-кластер (приоритет кейса) + HA (≥3 узла, внешний etcd).
+1. kubeadm-кластер (приоритетный вариант) + HA (≥3 узла, внешний etcd).
 2. cert-manager (Let's Encrypt) вместо самоподписанного сертификата
    (самоподписанный TLS и HTTP→HTTPS-редирект уже реализованы ✅).
 3. Расширенный Gateway API: маршрутизация по hostname, несколько бэкендов,

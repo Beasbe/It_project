@@ -1,6 +1,6 @@
 # SPEC-03 — Gateway API
 
-> Источник требований: кейс «MTC ENGINEER HACK», раздел 3 «Gateway API».
+> Источник требований: технические требования, раздел 3 «Gateway API».
 
 ## 0. Мета
 
@@ -12,7 +12,7 @@
 | Используемые ресурсы | `GatewayClass` (`traefik`), `Gateway` (`full-proj-gateway`), `HTTPRoute` (`full-proj-route`) |
 | Внешний доступ | NodePort `30080` (http://&lt;node-ip&gt;:30080) + NodePort `30443` (https://&lt;node-ip&gt;:30443, самоподписанный TLS) |
 
-## 1. Требования (из кейса)
+## 1. Требования
 
 | ID | Требование | Статус |
 |----|-----------|--------|

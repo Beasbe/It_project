@@ -1,7 +1,7 @@
 # full_proj — Laravel CMS + Next.js + WAF (ModSecurity) в Kubernetes
 
 Веб-приложение на стеке **Laravel 10 + Filament CMS + Next.js + MySQL**, защищённое
-WAF **ModSecurity + OWASP CRS**, с полным контуром по кейсу «MTC ENGINEER HACK»:
+WAF **ModSecurity + OWASP CRS**, с полным инфраструктурным контуром:
 
 - **Kubernetes (k3s)** + **Gateway API (Traefik v3)** + **Prometheus** + **Fluent Bit → Loki** + **Grafana**;
 - HTTPS (самоподписанный TLS, terminate на Gateway) + HTTP;
@@ -265,7 +265,7 @@ WAF). Фронтенд собран с относительными URL — ра
 - [`docs/specs/`](docs/specs/) — спецификации разделов задания (01–09);
 - [`waf/SPEC.md`](waf/SPEC.md) — детальная спецификация WAF;
 - [`MIGRATION.md`](MIGRATION.md) — перенос репозитория на новый GitHub;
-- [`serial.md`](serial.md) — журнал инцидентов и принятых решений за время хакатона.
+- [`serial.md`](serial.md) — журнал инцидентов и принятых решений за время проекта.
 
 ## Безопасность
 
