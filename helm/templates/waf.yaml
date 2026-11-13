@@ -192,6 +192,7 @@ spec:
       containers:
         - name: modsecurity-waf
           image: {{ .Values.waf.image }}
+          imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.waf.port }}
           resources:

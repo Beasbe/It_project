@@ -36,6 +36,7 @@ spec:
       containers:
         - name: backend
           image: {{ .Values.registry }}/backend:{{ .Values.image.tag }}
+          imagePullPolicy: Always
           # php-fpm, запущенный как PID 1, теряет env контейнера (известное поведение
           # официального php-образа в docker/k8s), и Laravel читает .env, зашитый в образ.
           # Поэтому генерируем .env из окружения пода перед стартом php-fpm.
