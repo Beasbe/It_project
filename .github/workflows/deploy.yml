@@ -43,7 +43,7 @@ jobs:
       - name: Проверка секретов (SOPS)
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: sops -d helm/secrets/dev.yaml > /dev/null && echo "SOPS: секреты расшифровываются"
+        run: sops -d helm/secrets/dev.yaml > /dev/null && echo "SOPS secrets decrypted OK"
 
       - name: Deploy (scripts/deploy.sh)
         env:
