@@ -83,7 +83,14 @@ helm upgrade --install traefik "${CHART_TRAEFIK}" \
   -f infra/traefik/values.yaml
 
 echo "==> 3/7 TLS-сертификат + секреты приложения (само приложение разворачивает Argo CD)..."
-./scripts/gen-cert.sh
+# В SAN сертификата добавляем IP самой ноды (на VDS это публичный IP) —
+# чтобы https://<node-ip>:30443 не ругался на несовпадение имени.
+NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || true)
+if [ -n "${NODE_IP}" ]; then
+  ./scripts/gen-cert.sh "${NODE_IP}"
+else
+  ./scripts/gen-cert.sh
+fi
 echo
 # GitOps: приложение full-proj управляется Argo CD из ветки main
 # (argocd/application.yaml). Здесь готовим только то, что живёт ВНЕ git:
