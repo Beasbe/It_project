@@ -62,9 +62,8 @@ spec:
     - name: {{ .Values.gateway.name }}
       sectionName: http
   rules:
-    # Весь HTTP -> HTTPS: RequestRedirect с явным портом NodePort 443
-    # (внешний порт, который видит клиент). Бэкенда у правила нет —
-    # редирект терминален, до WAF запрос не доходит.
+    # Весь HTTP -> HTTPS: RequestRedirect со сменой схемы (стандартный 443
+    # подразумевается браузером). Бэкенда у правила нет — редирект терминален.
     - matches:
         - path:
             type: PathPrefix
@@ -73,4 +72,3 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
-            port: {{ .Values.gateway.httpsNodePort }}
