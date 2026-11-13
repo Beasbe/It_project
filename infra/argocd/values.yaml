@@ -43,6 +43,11 @@ repoServer:
       memory: 256Mi
 
 redis:
+  image:
+    # Docker Hub вместо ecr-public.aws.com: с некоторых VDS CDN AWS
+    # недоступен/таймаутит (проверено на стенде). 7.2.x — open-source Redis.
+    repository: docker.io/library/redis
+    tag: 7.2.7-alpine
   resources:
     requests:
       cpu: 16m

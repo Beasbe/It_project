@@ -69,8 +69,14 @@ echo "==> Helm-чарты тянутся напрямую из OCI-регист�
 
 CHART_PROMETHEUS="${CHART_PROMETHEUS:-oci://ghcr.io/prometheus-community/charts/prometheus}"
 CHART_TRAEFIK="${CHART_TRAEFIK:-oci://ghcr.io/traefik/helm/traefik}"
-# Версия чарта Traefik пиннится: в v42 сменилась схема values (service.spec.type).
+# Версии чартов пиннятся (воспроизводимость; проверены на стенде):
+# в новых мажорах меняется схема values (напр. traefik v42: service.spec.type).
 CHART_TRAEFIK_VERSION="${CHART_TRAEFIK_VERSION:-42.4.0}"
+CHART_PROMETHEUS_VERSION="${CHART_PROMETHEUS_VERSION:-29.47.2}"
+CHART_LOKI_VERSION="${CHART_LOKI_VERSION:-7.6.0}"
+CHART_FLUENT_BIT_VERSION="${CHART_FLUENT_BIT_VERSION:-0.58.3}"
+CHART_GRAFANA_VERSION="${CHART_GRAFANA_VERSION:-10.5.15}"
+CHART_ARGOCD_VERSION="${CHART_ARGOCD_VERSION:-10.18.0}"
 CHART_LOKI="${CHART_LOKI:-oci://ghcr.io/grafana/helm-charts/loki}"
 CHART_FLUENT_BIT="${CHART_FLUENT_BIT:-oci://ghcr.io/fluent/helm-charts/fluent-bit}"
 CHART_GRAFANA="${CHART_GRAFANA:-oci://ghcr.io/grafana/helm-charts/grafana}"
@@ -105,6 +111,7 @@ if [ "${SECRETS_VALUES}" != "${SECRETS_FILE}" ]; then rm -f "${SECRETS_VALUES}";
 echo "==> 4/7 Мониторинг: Prometheus (с node-exporter и kube-state-metrics из чарта)..."
 helm upgrade --install prometheus "${CHART_PROMETHEUS}" \
   -n monitoring --create-namespace \
+  --version "${CHART_PROMETHEUS_VERSION}" \
   -f infra/prometheus/values.yaml
 
 echo "==> 5/7 Grafana (дашборды Prometheus + Loki, NodePort 30300)..."
@@ -119,19 +126,23 @@ kubectl create configmap grafana-dashboards -n monitoring \
   --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 helm upgrade --install grafana "${CHART_GRAFANA}" \
   -n monitoring \
+  --version "${CHART_GRAFANA_VERSION}" \
   -f infra/grafana/values.yaml
 
 echo "==> 6/7 Логирование: Loki + Fluent Bit..."
 helm upgrade --install loki "${CHART_LOKI}" \
   -n logging --create-namespace \
+  --version "${CHART_LOKI_VERSION}" \
   -f infra/logging/loki-values.yaml
 helm upgrade --install fluent-bit "${CHART_FLUENT_BIT}" \
   -n logging \
+  --version "${CHART_FLUENT_BIT_VERSION}" \
   -f infra/logging/fluentbit-values.yaml
 
 echo "==> 7/7 GitOps: Argo CD + Application full-proj (из ветки main репозитория)..."
 helm upgrade --install argocd "${CHART_ARGOCD}" \
   -n argocd --create-namespace \
+  --version "${CHART_ARGOCD_VERSION}" \
   -f infra/argocd/values.yaml
 kubectl apply -f argocd/application.yaml
 kubectl rollout status deployment argocd-server -n argocd --timeout=300s || true
