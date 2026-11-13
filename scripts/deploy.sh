@@ -69,6 +69,8 @@ echo "==> Helm-чарты тянутся напрямую из OCI-регист�
 
 CHART_PROMETHEUS="${CHART_PROMETHEUS:-oci://ghcr.io/prometheus-community/charts/prometheus}"
 CHART_TRAEFIK="${CHART_TRAEFIK:-oci://ghcr.io/traefik/helm/traefik}"
+# Версия чарта Traefik пиннится: в v42 сменилась схема values (service.spec.type).
+CHART_TRAEFIK_VERSION="${CHART_TRAEFIK_VERSION:-42.4.0}"
 CHART_LOKI="${CHART_LOKI:-oci://ghcr.io/grafana/helm-charts/loki}"
 CHART_FLUENT_BIT="${CHART_FLUENT_BIT:-oci://ghcr.io/fluent/helm-charts/fluent-bit}"
 CHART_GRAFANA="${CHART_GRAFANA:-oci://ghcr.io/grafana/helm-charts/grafana}"
@@ -80,6 +82,7 @@ kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/downlo
 echo "==> 2/7 Traefik v3 (реализация Gateway API, NodePort 30080 HTTP + 30443 HTTPS)..."
 helm upgrade --install traefik "${CHART_TRAEFIK}" \
   -n traefik --create-namespace \
+  --version "${CHART_TRAEFIK_VERSION}" \
   -f infra/traefik/values.yaml
 
 echo "==> 3/7 TLS-сертификат + секреты приложения (само приложение разворачивает Argo CD)..."

@@ -32,7 +32,10 @@ gateway:
   enabled: false
 
 service:
-  type: NodePort
+  # Внимание: с чарта traefik v42 поле называется service.spec.type
+  # (в старых версиях было service.type). Версия чарта пиннится в deploy.sh.
+  spec:
+    type: NodePort
 
 resources:
   requests:
