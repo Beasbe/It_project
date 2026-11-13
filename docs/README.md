@@ -26,7 +26,7 @@
 
 ```mermaid
 flowchart LR
-    U[Пользователь] -->|:30080 HTTP / :30443 HTTPS| G[Traefik v3 Gateway API]
+    U[Пользователь] -->|:80 HTTP / :443 HTTPS| G[Traefik v3 Gateway API]
     G -->|HTTPRoute| WAF[WAF: ModSecurity + OWASP CRS]
     WAF -->|"/api /admin /storage"| NX[nginx + Laravel php-fpm]
     WAF -->|"/ фронтенд"| FE[Next.js ClusterIP]
@@ -39,7 +39,7 @@ flowchart LR
 ```
 
 **Единая точка входа (вариант A):** весь трафик (и фронтенд, и бэкенд), по HTTP
-(`:30080`) и по HTTPS (`:30443`, самоподписанный TLS, terminate на Gateway) проходит
+(`:80`) и по HTTPS (`:443`, самоподписанный TLS, terminate на Gateway) проходит
 через Gateway API → WAF. WAF инспектирует ModSecurity+CRS каждый запрос и сам
 маршрутизирует по пути: `/api`, `/admin`, `/storage`, `/sanctum`, `/livewire`,
 `/filament`, `/css`, `/js`, `/vendor` → бэкенд; всё остальное (включая `/api/contact`)
@@ -55,7 +55,7 @@ flowchart LR
 | Требование | Статус | Где проверять |
 |---|---|---|
 | веб-приложение в Kubernetes | ✅ | [SPEC-01](specs/01-kubernetes.md), [SPEC-02](specs/02-application.md) |
-| доступ через Kubernetes Gateway API | ✅ | [SPEC-03](specs/03-gateway-api.md) — `curl http://localhost:30080/api/news`, `curl -sk https://localhost:30443/api/news` |
+| доступ через Kubernetes Gateway API | ✅ | [SPEC-03](specs/03-gateway-api.md) — `curl http://localhost/api/news`, `curl -sk https://localhost/api/news` |
 | Prometheus собирает метрики | ✅ | [SPEC-04](specs/04-monitoring.md) — `up`, `nginx_http_requests_total` |
 | Fluent Bit собирает логи | ✅ | [SPEC-05](specs/05-logging.md) — Loki API после запроса |
 | Ubuntu 24.04 | ✅ | [SPEC-01](specs/01-kubernetes.md), [SPEC-07](specs/07-automation.md) |

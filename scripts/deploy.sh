@@ -5,7 +5,7 @@
 #
 #  Состав:
 #    * Gateway API: CRD (standard channel) + GatewayClass (Traefik v3);
-#    * Traefik v3 (реализация Gateway API, NodePort 30080);
+#    * Traefik v3 (реализация Gateway API, NodePort 80);
 #    * приложение: helm-чарт ./helm (backend+nginx+exporter, mysql, frontend,
 #      WAF ModSecurity, Gateway + HTTPRoute);
 #    * мониторинг: Prometheus + node-exporter;
@@ -85,7 +85,7 @@ CHART_ARGOCD="${CHART_ARGOCD:-oci://ghcr.io/argoproj/argo-helm/argo-cd}"
 echo "==> 1/7 Gateway API: CRD v${GATEWAY_API_VERSION} (GatewayClass создаст Traefik-чарт)..."
 kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml"
 
-echo "==> 2/7 Traefik v3 (реализация Gateway API, NodePort 30080 HTTP + 30443 HTTPS)..."
+echo "==> 2/7 Traefik v3 (реализация Gateway API, NodePort 80 HTTP + 443 HTTPS)..."
 helm upgrade --install traefik "${CHART_TRAEFIK}" \
   -n traefik --create-namespace \
   --version "${CHART_TRAEFIK_VERSION}" \
@@ -93,7 +93,7 @@ helm upgrade --install traefik "${CHART_TRAEFIK}" \
 
 echo "==> 3/7 TLS-сертификат + секреты приложения (само приложение разворачивает Argo CD)..."
 # В SAN сертификата добавляем IP самой ноды (на VDS это публичный IP) —
-# чтобы https://<node-ip>:30443 не ругался на несовпадение имени.
+# чтобы https://<node-ip> не ругался на несовпадение имени.
 NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || true)
 if [ -n "${NODE_IP}" ]; then
   ./scripts/gen-cert.sh "${NODE_IP}"
@@ -106,6 +106,8 @@ echo
 #  * Secret app-secrets — рендерится шаблоном чарта из local-secrets.yaml;
 #  * TLS-секрет full-proj-tls — создан gen-cert.sh выше.
 helm template full-proj ./helm -f "${SECRETS_VALUES}" -s templates/secrets.yaml | kubectl apply -f -
+# Перечитать env из обновлённого Secret (backend окружение берёт при старте подов)
+kubectl rollout restart deployment/backend -n "${NAMESPACE}" >/dev/null 2>&1 || true
 if [ "${SECRETS_VALUES}" != "${SECRETS_FILE}" ]; then rm -f "${SECRETS_VALUES}"; fi
 
 echo "==> 4/7 Мониторинг: Prometheus (с node-exporter и kube-state-metrics из чарта)..."
@@ -159,16 +161,16 @@ echo "  kubectl get pods -n ${NAMESPACE}"
 echo "  kubectl get gateway,httproute -n ${NAMESPACE}"
 echo ""
 # приложение: GitOps (Argo CD) — сверка с репозиторием в http://<node-ip>:30444
-curl -sk https://localhost:30443/api/news | head -c 300
+curl -sk https://localhost/api/news | head -c 300
 
 echo "  # Grafana (метрики + логи): http://<node-ip>:30300 (admin / GRAFANA_ADMIN_PASSWORD)"
 echo "  # Argo CD (GitOps): http://<node-ip>:30444 — пароль:"
 echo "  #   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
 echo ""
 echo "  # WAF: легитимный трафик 200, атаки 403"
-echo "  curl -s -o /dev/null -w '%{http_code}\n' http://localhost:30080/"
-echo "  curl -s -o /dev/null -w '%{http_code}\n' -A 'sqlmap/1.7.2' http://localhost:30080/"
-echo "  curl -s -o /dev/null -w '%{http_code}\n' 'http://localhost:30080/?id=1%27%20OR%20%271%27%3D%271'"
+echo "  curl -s -o /dev/null -w '%{http_code}\n' http://localhost/"
+echo "  curl -s -o /dev/null -w '%{http_code}\n' -A 'sqlmap/1.7.2' http://localhost/"
+echo "  curl -s -o /dev/null -w '%{http_code}\n' 'http://localhost/?id=1%27%20OR%20%271%27%3D%271'"
 echo ""
 echo "  # метрики Prometheus:"
 echo "  kubectl port-forward -n monitoring svc/prometheus-server 9090:80"

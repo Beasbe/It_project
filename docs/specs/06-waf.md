@@ -26,13 +26,13 @@
 ## 2. Верификация (фактические результаты, k8s через Gateway API)
 
 ```bash
-./waf/tests/run-tests.sh http://localhost:30080
+./waf/tests/run-tests.sh http://localhost
 # Summary: 18 passed, 0 failed
 #   легитимный трафик: Chrome/Firefox/curl/API -> 200
 #   9 сканеров по UA -> 403 (правило 1000001)
 #   SQLi/XSS/path traversal/command injection -> 403 (CRS)
 
-python3 waf/tests/ddos_static.py --url http://localhost:30080/favicon.ico
+python3 waf/tests/ddos_static.py --url http://localhost/favicon.ico
 # часть ответов 429 (limit_req)
 
 kubectl logs -n full-proj deploy/waf | grep '"ruleId"'

@@ -1,6 +1,6 @@
 # Traefik v3 с провайдером Gateway API (реализация Gateway API для k3s).
 # Установка: helm install traefik traefik/traefik -n traefik --create-namespace -f infra/traefik/values.yaml
-# Внешний доступ: NodePort 30080 (http://<node-ip>:30080 -> Gateway -> HTTPRoute -> WAF -> приложение).
+# Внешний доступ: NodePort 80 (http://<node-ip> -> Gateway -> HTTPRoute -> WAF -> приложение).
 providers:
   kubernetesGateway:
     enabled: true
@@ -16,15 +16,15 @@ ports:
     exposedPort: 80
     expose:
       default: true
-    nodePort: 30080
+    nodePort: 80
   # HTTPS: TLS-termination на Gateway (listener :443, сертификат из Secret
-  # full-proj-tls — создаётся scripts/gen-cert.sh). NodePort 30443.
+  # full-proj-tls — создаётся scripts/gen-cert.sh). NodePort 443.
   websecure:
     port: 443
     exposedPort: 443
     expose:
       default: true
-    nodePort: 30443
+    nodePort: 443
 
 # Gateway создаём сами (helm/templates/gateway.yaml) — отключаем встроенный в чарт
 # (у него listener 8000, а наш Gateway использует порт 80 = ports.web.port)

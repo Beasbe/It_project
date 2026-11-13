@@ -12,7 +12,7 @@
 | Версия Kubernetes | **k3s v1.36.5 (Kubernetes v1.36.5)**, containerd 2.3.4 |
 | Способ развёртывания K8s | k3s (`get.k3s.io`), всё приложение — Helm-чарты, одна команда `./scripts/deploy.sh` |
 | Реализация Gateway API | **Traefik v3.7.13** (Gateway API v1.5.1): GatewayClass `traefik`, Gateway `full-proj-gateway` (listeners HTTP :80 + HTTPS :443, PROGRAMMED), HTTPRoute `full-proj-route` |
-| Внешний доступ | HTTP `http://<node-ip>:30080`, HTTPS `https://<node-ip>:30443` (самоподписанный TLS, terminate на Gateway) |
+| Внешний доступ | HTTP `http://<node-ip>`, HTTPS `https://<node-ip>` (самоподписанный TLS, terminate на Gateway) |
 | Инструменты автоматизации | `scripts/build-images.sh`, `scripts/deploy.sh`, `scripts/gen-cert.sh`, Helm, GitHub Actions (CI + CD) |
 | Логирование | **Fluent Bit v5.1.3 (DaemonSet) → Loki v3.6.12** (filesystem + PVC) |
 | Мониторинг | **Prometheus v3.15** + node-exporter + kube-state-metrics + nginx-exporter приложения |
@@ -24,7 +24,7 @@
 
 ```mermaid
 flowchart LR
-    U[Пользователь] -->|:30080 HTTP / :30443 HTTPS| G[Traefik Gateway API]
+    U[Пользователь] -->|:80 HTTP / :443 HTTPS| G[Traefik Gateway API]
     G -->|HTTPRoute| WAF[WAF ModSecurity + CRS]
     WAF -->|/api /admin| NX[nginx + Laravel]
     WAF -->|/ фронтенд| FE[Next.js]
@@ -78,10 +78,10 @@ kubectl exec -it -n full-proj deploy/backend -c backend -- php artisan make:fila
 
 | Сервис | URL | Доступ |
 |---|---|---|
-| Приложение (фронтенд) | `https://<node-ip>:30443/` | открытый; `http://<node-ip>:30080/` → 302-редирект на HTTPS |
-| Приложение (HTTPS, самоподписанный TLS) | `https://<node-ip>:30443/` | предупреждение браузера о CA — ожидаемо |
-| Админ-панель Filament | `https://<node-ip>:30443/admin` | пользователь создаётся в CMS |
-| API | `https://<node-ip>:30443/api` | JSON |
+| Приложение (фронтенд) | `https://<node-ip>/` | открытый; `http://<node-ip>/` → 302-редирект на HTTPS |
+| Приложение (HTTPS, самоподписанный TLS) | `https://<node-ip>/` | предупреждение браузера о CA — ожидаемо |
+| Админ-панель Filament | `https://<node-ip>/admin` | пользователь создаётся в CMS |
+| API | `https://<node-ip>/api` | JSON |
 | Grafana | `http://<node-ip>:30300` | `admin` / пароль из `GRAFANA_ADMIN_PASSWORD` (задаётся при развёртывании) |
 | Prometheus | `kubectl port-forward -n monitoring svc/prometheus-server 9090:80` | `http://localhost:9090` |
 | Loki | `kubectl port-forward -n logging svc/loki 3100:3100` | `http://localhost:3100` |
@@ -94,8 +94,8 @@ kubectl exec -it -n full-proj deploy/backend -c backend -- php artisan make:fila
 
 | Требование | Как реализовано | Обоснование | Как проверить |
 |---|---|---|---|
-| Веб-приложение в Kubernetes | Deployments backend(+nginx+exporter)/frontend/mysql, PVC, Secret `app-secrets`, миграции | стандартные ресурсы, минимальный стек | `kubectl get pods -n full-proj`; `curl localhost:30080/api/news` → 200 JSON |
-| Доступ через Gateway API | Traefik v3: GatewayClass + Gateway (HTTP :80 → 302-редирект, HTTPS :443) + HTTPRoute → Service waf | open-source, без вендор-лока; Gateway API v1.5.1 | `kubectl get gateway -n full-proj` (PROGRAMMED=True); `curl -sk https://localhost:30443/api/news` → 200 |
+| Веб-приложение в Kubernetes | Deployments backend(+nginx+exporter)/frontend/mysql, PVC, Secret `app-secrets`, миграции | стандартные ресурсы, минимальный стек | `kubectl get pods -n full-proj`; `curl localhost/api/news` → 200 JSON |
+| Доступ через Gateway API | Traefik v3: GatewayClass + Gateway (HTTP :80 → 302-редирект, HTTPS :443) + HTTPRoute → Service waf | open-source, без вендор-лока; Gateway API v1.5.1 | `kubectl get gateway -n full-proj` (PROGRAMMED=True); `curl -sk https://localhost/api/news` → 200 |
 | Prometheus собирает метрики | prometheus-чарт + node-exporter + kube-state-metrics + sidecar nginx-exporter (аннотации) | метрики и инфраструктуры, и приложения | `kubectl port-forward -n monitoring svc/prometheus-server 9090:80`; `curl localhost:9090/api/v1/query?query=up`; `nginx_http_requests_total` |
 | Fluent Bit собирает логи | DaemonSet Fluent Bit (CRI-парсер) → Loki single-binary | лёгкий сборщик, централизованное хранилище | после `curl` к приложению: Loki API `{namespace="full-proj"}` содержит access-лог |
 | Ubuntu 24.04 | весь стенд развёрнут на Ubuntu 24.04.5 LTS | требование | воспроизведение по `deploy.sh` |
@@ -105,11 +105,11 @@ kubectl exec -it -n full-proj deploy/backend -c backend -- php artisan make:fila
 
 | Улучшение | Как реализовано | Обоснование | Как проверить |
 |---|---|---|---|
-| WAF в k8s | Deployment `waf` (ModSecurity+CRS) — **единая точка входа: фронтенд и бэкенд за WAF** (роутинг по path); правило 1000001 (сканеры/ботнеты), `limit_req` на статику (429); ConfigMap'ы в `helm/templates/waf.yaml` | защита прикладного уровня, обойти нельзя (внешних портов у приложений нет) | `./waf/tests/run-tests.sh http://localhost:30080` → **18/18**; `python3 waf/tests/ddos_static.py` → 429; `kubectl logs deploy/waf` → audit JSON с ruleId |
+| WAF в k8s | Deployment `waf` (ModSecurity+CRS) — **единая точка входа: фронтенд и бэкенд за WAF** (роутинг по path); правило 1000001 (сканеры/ботнеты), `limit_req` на статику (429); ConfigMap'ы в `helm/templates/waf.yaml` | защита прикладного уровня, обойти нельзя (внешних портов у приложений нет) | `./waf/tests/run-tests.sh http://localhost` → **18/18**; `python3 waf/tests/ddos_static.py` → 429; `kubectl logs deploy/waf` → audit JSON с ruleId |
 | Метрики приложения | nginx-prometheus-exporter sidecar (stub_status) | HTTP-метрики обязательны для observability | PromQL `nginx_http_requests_total` растёт после запросов |
 | CI/CD | CI `.github/workflows/ci.yml` (авто на push/PR): helm lint + сборка + push в GHCR. CD `.github/workflows/deploy.yml` (workflow_dispatch): helm upgrade на self-hosted runner — выполняет принимающая сторона | финал — на завершающем этапе | push в main → CI зелёный, образы в GHCR |
 | Grafana | чарт `infra/grafana/values.yaml`, NodePort 30300; Prometheus+Loki подключены автоматически; 4 дашборда из ConfigMap (железо, k8s/приложение, WAF-логи, живость сервисов); пароль админа хранится в PVC (меняется в UI) | визуализация метрик и логов без ручной настройки | `http://<node-ip>:30300` → дашборды с данными, Service Health — все UP |
-| HTTPS (самоподписанный TLS) | listener `https` :443 в Gateway (`certificateRefs` → Secret `full-proj-tls` из `scripts/gen-cert.sh`); terminate на Traefik, WAF инспектирует расшифрованный трафик | безопасность без внешнего CA; фронтенд на относительных URL — работает и по HTTP, и по HTTPS | `curl -sk https://localhost:30443/api/news` → 200; атака на HTTPS → 403 |
+| HTTPS (самоподписанный TLS) | listener `https` :443 в Gateway (`certificateRefs` → Secret `full-proj-tls` из `scripts/gen-cert.sh`); terminate на Traefik, WAF инспектирует расшифрованный трафик | безопасность без внешнего CA; фронтенд на относительных URL — работает и по HTTP, и по HTTPS | `curl -sk https://localhost/api/news` → 200; атака на HTTPS → 403 |
 | DevSecOps: gitleaks | джоба `secrets` в CI (`gitleaks-action`, полная git-история) — блокирует сборку при утечке | превентивная защита от попадания секретов | локально: 79 коммитов — «no leaks found»; CI green |
 | DevSecOps: Argo CD (GitOps) | Argo CD (NodePort 30444; пароль — из `argocd-initial-admin-secret`) управляет приложением из ветки `main`; automated sync: selfHeal + prune; секреты вне git (`secrets.existingSecret`); образы по git SHA, WAF по диджесту | кластер всегда = репозиторий, ручной дрейф откатывается | `kubectl scale deploy backend --replicas=3` → Argo CD возвращает 1; UI `http://<node-ip>:30444` |
 | DevSecOps: SOPS | секреты в git только зашифрованными (`helm/secrets/dev.yaml`, age); deploy.sh расшифровывает (локальный ключ / `SOPS_AGE_KEY` в CI); в шаблоне `required`-гарды | нет секретов в истории/values/README; единый источник | `sops -d helm/secrets/dev.yaml` требует ключа; gitleaks CI green |

@@ -3,13 +3,13 @@
 #  Сборка и публикация образов приложения в локальный registry (k3s).
 #  Использование:
 #    ./scripts/build-images.sh                     # registry по умолчанию localhost:5000/full-proj
-#    REGISTRY=localhost:5000/full-proj API_URL=http://localhost:30080 ./scripts/build-images.sh
+#    REGISTRY=localhost:5000/full-proj API_URL=http://localhost ./scripts/build-images.sh
 # =============================================================================
 set -euo pipefail
 
 REGISTRY="${REGISTRY:-localhost:5000/full-proj}"
 # URL бэкенда, вшиваемый во фронтенд при сборке. Пустая строка = относительные
-# URL (/api, /storage) — работают и по HTTP :30080, и по HTTPS :30443.
+# URL (/api, /storage) — работают и по HTTP :80, и по HTTPS :443.
 # SSR-запросы внутри кластера ходят через BACKEND_INTERNAL_API_URL (helm).
 API_URL="${API_URL:-}"
 

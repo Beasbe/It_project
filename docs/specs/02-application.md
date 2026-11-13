@@ -41,7 +41,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/   # 200
 docker compose logs --tail=5 webserver                    # access-логи
 
 # Kubernetes
-curl -s http://<node-ip>:30080/api/news | head -c 300     # 200 + JSON
+curl -s http://<node-ip>/api/news | head -c 300     # 200 + JSON
 kubectl logs -n full-proj deploy/nginx --tail=5           # access-логи
 ```
 

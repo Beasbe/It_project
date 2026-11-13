@@ -36,7 +36,7 @@
 
 `deploy.sh` выполняет 7 идемпотентных шагов:
 1. Gateway API CRD v1.5.1 + workaround CoreDNS для k3s v1.36.x;
-2. Traefik v3 (Gateway API, NodePort 30080 HTTP + 30443 HTTPS);
+2. Traefik v3 (Gateway API, NodePort 80 HTTP + 443 HTTPS);
 3. самоподписанный TLS-сертификат (`scripts/gen-cert.sh`) + Secret `app-secrets`
    (рендерится шаблоном чарта из `local-secrets.yaml` — секреты вне git);
 4. Prometheus (+node-exporter, +kube-state-metrics из чарта);
@@ -55,7 +55,7 @@
   (`docker/build-push-action`, buildkit-кеш) → push в GHCR с тегами
   `:latest` и `:${{ github.sha }}`. В PR образы собираются без push.
   `NEXT_PUBLIC_API_URL` берётся из Variable репозитория (fallback
-  `http://localhost:30080`).
+  `http://localhost`).
 - **CD (`.github/workflows/deploy.yml`)** — запускается вручную
   (`workflow_dispatch`): требует self-hosted runner с Docker/kubectl/helm и
   доступом к кластеру; выполняет `helm upgrade --install` с секретами из
@@ -70,7 +70,7 @@
 ```bash
 ./scripts/deploy.sh      # повторный запуск: "has been upgraded", exit 0
 kubectl get pods -A      # все Running
-curl -s http://localhost:30080/api/news | head -c 120   # 200 + JSON
+curl -s http://localhost/api/news | head -c 120   # 200 + JSON
 ```
 
 ## 4. Ограничения / роадмап

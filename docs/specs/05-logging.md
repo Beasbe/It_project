@@ -32,7 +32,7 @@
 
 ```bash
 # 1. Обратиться к приложению
-curl -s http://localhost:30080/api/news?logtest=1 > /dev/null
+curl -s http://localhost/api/news?logtest=1 > /dev/null
 
 # 2. Запись появляется в Loki
 kubectl port-forward -n logging svc/loki 3100:3100

@@ -81,7 +81,7 @@ curl 'http://localhost:9090/api/v1/query?query=up' | jq '.data.result[] | {job: 
 
 # метрики приложения: после обращений к приложению счётчик растёт
 curl 'http://localhost:9090/api/v1/query?query=nginx_http_requests_total'
-# {host="", status=""} -> N запросов (растёт после каждого curl к :30080)
+# {host="", status=""} -> N запросов (растёт после каждого curl к :80)
 
 # инфраструктурные метрики
 curl 'http://localhost:9090/api/v1/query?query=node_memory_MemAvailable_bytes/1024/1024'

@@ -72,10 +72,10 @@ export GRAFANA_ADMIN_PASSWORD=...
 
 | Сервис | URL | Описание |
 |---|---|---|
-| Фронтенд | `https://localhost:30443/` | Next.js (за Gateway API + WAF); `http://localhost:30080/` автоматически редиректит сюда |
-| Бэкенд | `https://localhost:30443/api`, `/admin`, `/storage` | nginx → Laravel (за WAF) |
-| Админ-панель | `https://localhost:30443/admin` | Filament CMS |
-| API | `https://localhost:30443/api` | JSON-эндпоинты |
+| Фронтенд | `https://localhost/` | Next.js (за Gateway API + WAF); `http://localhost/` автоматически редиректит сюда |
+| Бэкенд | `https://localhost/api`, `/admin`, `/storage` | nginx → Laravel (за WAF) |
+| Админ-панель | `https://localhost/admin` | Filament CMS |
+| API | `https://localhost/api` | JSON-эндпоинты |
 | Grafana | `http://localhost:30300` | логин `admin`; пароль — тот, что вы задали в `GRAFANA_ADMIN_PASSWORD` |
 | Argo CD (GitOps) | `http://localhost:30444` | логин `admin`; пароль — из Secret (команда ниже) |
 
@@ -114,17 +114,17 @@ chmod +x setup.sh && ./setup.sh
 
 ## Эндпоинты и доступ к сервисам (k8s)
 
-### Через Gateway API :30080 (единая точка входа, всё за WAF)
+### Через Gateway API :80 (единая точка входа, всё за WAF)
 
 | Сервис | URL | Что вернёт |
 |---|---|---|
-| Фронтенд | `http://localhost:30080/` | страницы Next.js (лента, проекты, контакты) |
-| API — новости | `http://localhost:30080/api/news` | `{"success":true,"data":[...]}` |
-| API — проекты | `http://localhost:30080/api/projects` | JSON со списком проектов |
-| Админ-панель | `http://localhost:30080/admin` | перед логином, создайте пользака командой ниже |
-| Хранилище | `http://localhost:30080/storage/...` | загруженные файлы |
-| Healthcheck WAF | `http://localhost:30080/healthz` | `OK` (отвечает сам WAF, не проксируется) |
-| Метрики WAF | `http://localhost:30080/metrics/nginx` | stub_status nginx WAF; по умолчанию **403** — открывается через `METRICS_ALLOW_FROM` (env пода waf) |
+| Фронтенд | `http://localhost/` | страницы Next.js (лента, проекты, контакты) |
+| API — новости | `http://localhost/api/news` | `{"success":true,"data":[...]}` |
+| API — проекты | `http://localhost/api/projects` | JSON со списком проектов |
+| Админ-панель | `http://localhost/admin` | перед логином, создайте пользака командой ниже |
+| Хранилище | `http://localhost/storage/...` | загруженные файлы |
+| Healthcheck WAF | `http://localhost/healthz` | `OK` (отвечает сам WAF, не проксируется) |
+| Метрики WAF | `http://localhost/metrics/nginx` | stub_status nginx WAF; по умолчанию **403** — открывается через `METRICS_ALLOW_FROM` (env пода waf) |
 
 Создание пользователя для админки (интерактивно — имя, email, пароль):
 
@@ -165,7 +165,7 @@ kubectl get pods -n monitoring -l app.kubernetes.io/name=kube-state-metrics
 
 | Сервис | Команда | Что смотреть |
 |---|---|---|
-| Приложение + WAF | — | `https://localhost:30443/` (HTTP `:30080` → 302-редирект), `/admin`, `/api` |
+| Приложение + WAF | — | `https://localhost/` (HTTP `:80` → 302-редирект), `/admin`, `/api` |
 | Grafana | — | `http://localhost:30300` (NodePort): дашборды «Node Overview», «Kubernetes / Application», «WAF & Application logs», «Service Health» |
 | Argo CD | — | `http://localhost:30444` (NodePort): Application `full-proj` — sync-статус, дрейф кластера |
 | Traefik Dashboard | `kubectl port-forward -n traefik deploy/traefik 8080:8080` | `http://localhost:8080/dashboard/` |
@@ -180,12 +180,12 @@ kubectl get pods -n monitoring -l app.kubernetes.io/name=kube-state-metrics
 ```bash
 # 1. Gateway API + приложение (HTTP и HTTPS)
 kubectl get gateway -n full-proj                    # PROGRAMMED: True (listeners http:80, https:443)
-curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' http://localhost:30080/api/news   # 302 -> https://localhost:30443/...
-curl -sk https://localhost:30443/api/news | head -c 200   # 200 + JSON (TLS-terminate на Gateway)
+curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' http://localhost/api/news   # 302 -> https://localhost/...
+curl -sk https://localhost/api/news | head -c 200   # 200 + JSON (TLS-terminate на Gateway)
 
 # 2. WAF: легитимный трафик проходит, атаки блокируются (по HTTPS)
-./waf/tests/run-tests.sh https://localhost:30443    # 18/18
-python3 waf/tests/ddos_static.py --url https://localhost:30443/favicon.ico --insecure  # 429
+./waf/tests/run-tests.sh https://localhost    # 18/18
+python3 waf/tests/ddos_static.py --url https://localhost/favicon.ico --insecure  # 429
 kubectl logs -n full-proj deploy/waf                # audit JSON с ruleId
 
 # 3. Мониторинг (порт-форвард в фоне, в конце — kill %1)
@@ -207,7 +207,7 @@ kill %1
 
 ## HTTPS (самоподписанный сертификат)
 
-HTTPS-точка входа `https://<node-ip>:30443`: TLS терминируется на Gateway
+HTTPS-точка входа `https://<node-ip>`: TLS терминируется на Gateway
 (Traefik), сертификат — самоподписанный, из Secret `full-proj-tls`
 (генерируется `scripts/gen-cert.sh`, SAN: `localhost`, `127.0.0.1`,
 `192.168.200.1`; можно добавить IP аргументами). Браузер покажет
@@ -215,8 +215,8 @@ HTTPS-точка входа `https://<node-ip>:30443`: TLS терминируе�
 для CLI используйте `curl -k`. WAF инспектирует и HTTPS-трафик (TLS снят до
 WAF). Фронтенд собран с относительными URL — работает по обоим протоколам.
 
-**HTTP → HTTPS:** листенер `http` (:30080) отдаёт `302` на
-`https://<host>:30443/...` (HTTPRoute `full-proj-http-redirect` с фильтром
+**HTTP → HTTPS:** листенер `http` (:80) отдаёт `302` на
+`https://<host>:443/...` (HTTPRoute `full-proj-http-redirect` с фильтром
 `RequestRedirect`); приложение прикреплено только к HTTPS-листенеру, так
 что весь прикладной трафик гарантированно идёт по TLS и через WAF.
 

@@ -38,7 +38,7 @@ metadata:
 spec:
   parentRefs:
     # Приложение — только на HTTPS-листенере (TLS-terminate на Gateway).
-    # HTTP-листенер :30080 отдаёт 308-редирект на https (отдельный HTTPRoute ниже).
+    # HTTP-листенер :80 отдаёт 308-редирект на https (отдельный HTTPRoute ниже).
     - name: {{ .Values.gateway.name }}
       sectionName: https
   rules:
@@ -62,7 +62,7 @@ spec:
     - name: {{ .Values.gateway.name }}
       sectionName: http
   rules:
-    # Весь HTTP -> HTTPS: RequestRedirect с явным портом NodePort 30443
+    # Весь HTTP -> HTTPS: RequestRedirect с явным портом NodePort 443
     # (внешний порт, который видит клиент). Бэкенда у правила нет —
     # редирект терминален, до WAF запрос не доходит.
     - matches:
