@@ -99,9 +99,13 @@ helm upgrade --install cert-manager "${CHART_CERT_MANAGER}" \
   --version "${CHART_CERT_MANAGER_VERSION}" \
   -f infra/cert-manager/values.yaml
 CERT_MANAGER_EMAIL="${CERT_MANAGER_EMAIL:-admin@it-project.su}"
-sed "s|__EMAIL__|${CERT_MANAGER_EMAIL}|" infra/cert-manager/clusterissuer.yaml | kubectl apply -f -
-kubectl -n cert-manager rollout status deployment/cert-manager --timeout=180s || true
-kubectl -n cert-manager rollout status deployment/cert-manager-webhook --timeout=180s || true
+# Ждём webhook (валидация ClusterIssuer идёт через него), затем применяем
+# ClusterIssuer с ретраями — webhook может стартовать с задержкой.
+kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager -n cert-manager || true
+kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager-webhook -n cert-manager || true
+for i in 1 2 3 4 5; do
+  sed "s|__EMAIL__|${CERT_MANAGER_EMAIL}|" infra/cert-manager/clusterissuer.yaml | kubectl apply -f - && break || sleep 10
+done
 
 # В SAN сертификата добавляем IP самой ноды (bootstrap; Let's Encrypt перезапишет
 # Secret на сертификат домена, как только выпустится).
