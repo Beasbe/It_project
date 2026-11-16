@@ -8,6 +8,16 @@
 crds:
   enabled: true
 
+# Включаем интеграцию с Gateway API: gateway-shim (автосоздание Certificate
+# из аннотации cert-manager.io/cluster-issuer на Gateway) + HTTP-01 solver
+# gatewayHTTPRoute (используется в ClusterIssuer letsencrypt-prod).
+# В cert-manager v1.21 feature gate ExperimentalGatewayAPISupport уже включён
+# по умолчанию (Beta), но ДОПОЛНИТЕЛЬНО нужен флаг --enable-gateway-api
+# (поле GatewayAPIConfig.Enabled, дефолт = false). Без него контроллер
+# gateway-shim не стартует и LE-сертификат на домен не выпускается.
+extraArgs:
+  - --enable-gateway-api=true
+
 # Стартовый api-check не нужен (долго ждёт webhook на слабых VDS)
 startupapicheck:
   enabled: false

@@ -53,6 +53,10 @@
   автоматически (90 дней, обновление за 30). До выпуска Secret бутстрапится
   самоподписанным сертификатом (`scripts/gen-cert.sh`) — cert-manager его
   перезаписывает.
+  **Важно:** в cert-manager v1.21 для gateway-shim/HTTP-01-solver обязательно
+  задать `extraArgs: [--enable-gateway-api=true]` в
+  `infra/cert-manager/values.yaml` (поле `GatewayAPIConfig.Enabled`, дефолт
+  false; feature gate `ExperimentalGatewayAPISupport` уже true по умолчанию).
 - **Проброс схемы клиента**: WAF передаёт `X-Forwarded-Proto` не из своего
   `$scheme` (до WAF трафик всегда http), а из заголовка Traefik
   (`waf.nginxForwardedProto: "$http_x_forwarded_proto"`), а nginx бэкенда — в

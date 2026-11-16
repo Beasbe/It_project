@@ -513,3 +513,44 @@ deploy.sh взял секреты из зашифрованного helm/secrets
 на машине), а НЕ из свежего local-secrets.yaml — ожидаемо по дизайну, но
 для проверяющего без ключа sops -d упадёт и сработает fallback на
 local-secrets.yaml. Учесть в доке: у судей без ключа всегда fallback.
+
+## Сессия (VDS, продакшн): Let's Encrypt не выпускается — gateway-shim выключен
+
+### Симптом
+cert-manager v1.21.3 развёрнут, ClusterIssuer `letsencrypt-prod` Ready=True,
+Gateway `full-proj-gateway` имеет `hostname: it-project.su` и аннотацию
+`cert-manager.io/cluster-issuer`, но `Certificate` не создаётся
+(`kubectl get certificate -A` → пусто).
+
+### Диагностика
+`kubectl logs deploy/cert-manager -n cert-manager` →
+`skipping disabled controller "gateway-shim"` — контроллер gateway-shim
+(автосоздание Certificate из аннотации на Gateway) отключён.
+
+### Причина (главная)
+В cert-manager v1.21 gateway-shim включается ДВУМЯ условиями:
+1. feature gate `ExperimentalGatewayAPISupport` — в v1.21 уже `true`
+   по умолчанию (Beta);
+2. флаг `--enable-gateway-api` (поле `GatewayAPIConfig.Enabled`) —
+   дефолт **false** (`defaults.go:75`). Именно его не было.
+
+### Ошибка по пути (не повторять)
+Сначала добавил `featureGates: ExperimentalGatewayAPISupport=true` и применил
+ручным `kubectl patch` — gateway-shim остался disabled, т.к. feature gate и так
+true, а нужен был `--enable-gateway-api`. Ручной patch — антипаттерн (не в git,
+helm/Argo CD откатит): правки только через values → коммит → CD.
+
+### Решение
+`infra/cert-manager/values.yaml`:
+```yaml
+extraArgs:
+  - --enable-gateway-api=true
+```
+cert-manager ставится helm'ом в `scripts/deploy.sh` (Argo CD им НЕ управляет),
+но правильный путь всё равно: values → коммит → CD, без ручных патчей.
+
+### Урок
+- Диагностику вести по логам контроллера (`enabled controllers`, `skipping
+  disabled controller`), а не по догадкам о дефолтах.
+- Для Gateway API в cert-manager нужны ОБА: feature gate
+  `ExperimentalGatewayAPISupport` + флаг `--enable-gateway-api`.
