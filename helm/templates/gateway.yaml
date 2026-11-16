@@ -5,6 +5,12 @@ kind: Gateway
 metadata:
   name: {{ .Values.gateway.name }}
   namespace: {{ .Values.namespace }}
+  {{- if .Values.gateway.certManagerIssuer }}
+  annotations:
+    # cert-manager (gateway-shim) выпускает сертификат на домены listeners
+    # и кладёт его в Secret из certificateRefs; продление — автоматическое.
+    cert-manager.io/cluster-issuer: {{ .Values.gateway.certManagerIssuer }}
+  {{- end }}
 spec:
   gatewayClassName: {{ .Values.gateway.className }}
   listeners:
@@ -14,12 +20,15 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
-    # HTTPS: TLS-termination на Traefik (самоподписанный сертификат из Secret
-    # full-proj-tls, создаётся scripts/gen-cert.sh). WAF за Gateway продолжает
-    # работать по HTTP — инспектируется весь трафик.
+    # HTTPS: TLS-termination на Traefik. Сертификат: либо выпускается
+    # cert-manager'ом (если задан hostname + issuer), либо самоподписанный
+    # bootstrap из Secret full-proj-tls (scripts/gen-cert.sh).
     - name: https
       protocol: HTTPS
       port: {{ .Values.gateway.httpsListenerPort }}
+      {{- if .Values.gateway.hostname }}
+      hostname: {{ .Values.gateway.hostname }}
+      {{- end }}
       tls:
         mode: Terminate
         certificateRefs:
@@ -72,3 +81,6 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
+            {{- if .Values.gateway.hostname }}
+            hostname: {{ .Values.gateway.hostname }}
+            {{- end }}

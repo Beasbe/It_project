@@ -1,0 +1,19 @@
+# ClusterIssuer Let's Encrypt (production). HTTP-01 через Gateway API (Traefik :80).
+# Email подставляется в deploy.sh из переменной CERT_MANAGER_EMAIL (или дефолт ниже).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: __EMAIL__
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: full-proj-gateway
+                namespace: full-proj
+                sectionName: http

@@ -10,7 +10,7 @@
 | Реализация Gateway API | **Traefik v3.7.13** (провайдер `kubernetesGateway`) |
 | Версия Gateway API | v1.5.1 (стандартный канал CRD) |
 | Используемые ресурсы | `GatewayClass` (`traefik`), `Gateway` (`full-proj-gateway`), `HTTPRoute` (`full-proj-route`) |
-| Внешний доступ | NodePort `80` (http://&lt;node-ip&gt;:80) + NodePort `443` (https://&lt;node-ip&gt;:443, самоподписанный TLS) |
+| Внешний доступ | домен `https://it-project.su` (Let's Encrypt, автопродление через cert-manager); NodePort `80` → 302 на HTTPS |
 
 ## 1. Требования
 
@@ -46,10 +46,13 @@
   (scheme https, port 443) — весь HTTP-трафик уходит 302-редиректом на HTTPS,
   до WAF не доходит.
 - Traefik-сервис — NodePort `80`/`443` (для k3s без MetalLB; на kubeadm — LoadBalancer).
-- **Сертификат**: самоподписанный (openssl), генерируется идемпотентно скриптом
-  `scripts/gen-cert.sh` (SAN: `localhost`, `127.0.0.1`, `192.168.200.1` — стабильный
-  IP ноды на dummy-интерфейсе; можно добавить IP аргументами). Браузер покажет
-  предупреждение о недоверенном CA — это ожидаемо.
+- **Сертификат**: Let's Encrypt через **cert-manager** (ClusterIssuer
+  `letsencrypt-prod`, ACME HTTP-01 через Gateway API :80). Gateway получает
+  `hostname: it-project.su` и аннотацию `cert-manager.io/cluster-issuer`;
+  cert-manager выпускает сертификат в Secret `full-proj-tls` и продлевает его
+  автоматически (90 дней, обновление за 30). До выпуска Secret бутстрапится
+  самоподписанным сертификатом (`scripts/gen-cert.sh`) — cert-manager его
+  перезаписывает.
 - **Проброс схемы клиента**: WAF передаёт `X-Forwarded-Proto` не из своего
   `$scheme` (до WAF трафик всегда http), а из заголовка Traefik
   (`waf.nginxForwardedProto: "$http_x_forwarded_proto"`), а nginx бэкенда — в
@@ -72,4 +75,4 @@ curl -sk https://localhost/api/news | head -c 200  # 200 + JSON
 ## 4. Дополнительные возможности (роадмап)
 
 - несколько бэкендов/маршрутизация по path и hostname;
-- cert-manager (Let's Encrypt) вместо самоподписанного сертификата.
+- сертификат для дополнительных доменов (cert-manager уже настроен);

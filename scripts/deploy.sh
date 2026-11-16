@@ -77,10 +77,12 @@ CHART_LOKI_VERSION="${CHART_LOKI_VERSION:-7.6.0}"
 CHART_FLUENT_BIT_VERSION="${CHART_FLUENT_BIT_VERSION:-0.58.3}"
 CHART_GRAFANA_VERSION="${CHART_GRAFANA_VERSION:-10.5.15}"
 CHART_ARGOCD_VERSION="${CHART_ARGOCD_VERSION:-10.18.0}"
+CHART_CERT_MANAGER_VERSION="${CHART_CERT_MANAGER_VERSION:-1.21.3}"
 CHART_LOKI="${CHART_LOKI:-oci://ghcr.io/grafana/helm-charts/loki}"
 CHART_FLUENT_BIT="${CHART_FLUENT_BIT:-oci://ghcr.io/fluent/helm-charts/fluent-bit}"
 CHART_GRAFANA="${CHART_GRAFANA:-oci://ghcr.io/grafana/helm-charts/grafana}"
 CHART_ARGOCD="${CHART_ARGOCD:-oci://ghcr.io/argoproj/argo-helm/argo-cd}"
+CHART_CERT_MANAGER="${CHART_CERT_MANAGER:-oci://quay.io/jetstack/charts/cert-manager}"
 
 echo "==> 1/7 Gateway API: CRD v${GATEWAY_API_VERSION} (GatewayClass создаст Traefik-чарт)..."
 kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml"
@@ -91,9 +93,18 @@ helm upgrade --install traefik "${CHART_TRAEFIK}" \
   --version "${CHART_TRAEFIK_VERSION}" \
   -f infra/traefik/values.yaml
 
-echo "==> 3/7 TLS-сертификат + секреты приложения (само приложение разворачивает Argo CD)..."
-# В SAN сертификата добавляем IP самой ноды (на VDS это публичный IP) —
-# чтобы https://<node-ip> не ругался на несовпадение имени.
+echo "==> 3/7 cert-manager (Let's Encrypt) + TLS-сертификат + секреты приложения..."
+helm upgrade --install cert-manager "${CHART_CERT_MANAGER}" \
+  -n cert-manager --create-namespace \
+  --version "${CHART_CERT_MANAGER_VERSION}" \
+  -f infra/cert-manager/values.yaml
+CERT_MANAGER_EMAIL="${CERT_MANAGER_EMAIL:-admin@it-project.su}"
+sed "s|__EMAIL__|${CERT_MANAGER_EMAIL}|" infra/cert-manager/clusterissuer.yaml | kubectl apply -f -
+kubectl -n cert-manager rollout status deployment/cert-manager --timeout=180s || true
+kubectl -n cert-manager rollout status deployment/cert-manager-webhook --timeout=180s || true
+
+# В SAN сертификата добавляем IP самой ноды (bootstrap; Let's Encrypt перезапишет
+# Secret на сертификат домена, как только выпустится).
 NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || true)
 if [ -n "${NODE_IP}" ]; then
   ./scripts/gen-cert.sh "${NODE_IP}"

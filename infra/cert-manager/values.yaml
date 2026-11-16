@@ -1,0 +1,40 @@
+# cert-manager: автоматическая выдача и продление сертификатов Let's Encrypt.
+# Установка (из deploy.sh):
+#   helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+#     -n cert-manager --create-namespace --version <VERSION> -f infra/cert-manager/values.yaml
+# Сертификат на домен выдаётся по ClusterIssuer (infra/cert-manager/clusterissuer.yaml)
+# и аннотации на Gateway (cert-manager.io/cluster-issuer); продление — автоматическое.
+
+crds:
+  enabled: true
+
+# Стартовый api-check не нужен (долго ждёт webhook на слабых VDS)
+startupapicheck:
+  enabled: false
+
+# Скромные ресурсы — стенд на 3.8 GiB
+resources:
+  requests:
+    cpu: 32m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 16m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 192Mi
+
+cainjector:
+  resources:
+    requests:
+      cpu: 16m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 192Mi
